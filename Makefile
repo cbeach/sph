@@ -2,14 +2,18 @@
 OBJECTS :=\
 	SPH.o\
 	uVect.o\
+	ogl.o
 
 SOURCE :=\
 	./util/uVect.cpp\
+	./render/ogl.cpp\
 	SPH.cpp
+	
+
 
 
 CC := g++
-HEADERFILES := -I/home/owner/Documents/dev/cs406/SPH
+HEADERFILES := -I/home/casey/Documents/cs406/sph/
 LDFLAGS := -o
 CPFLAGS := -c -g
 

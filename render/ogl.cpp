@@ -3,9 +3,7 @@ Name:	Casey Beach
 Date:	6/27/2010
 Terminus: ogl.h
 
-Terminus is meant to be an MMOG (Massively Multiplayer Online Game), as
-such it will be, roughly speaking split into two parts, ogl and
-server.  The ogl will handle all user interaction and graphics.
+ogl is used as a OpenGL controller.  ogl is responsible for managing all openGL related activities.
 *************************************************************************/
 #include <stdlib.h>
 #include <iostream>
