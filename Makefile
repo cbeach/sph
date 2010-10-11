@@ -2,11 +2,13 @@
 OBJECTS :=\
 	SPH.o\
 	uVect.o\
+	sp.o\
 	ogl.o
 
 SOURCE :=\
 	./util/uVect.cpp\
 	./render/ogl.cpp\
+	./particle/sp.cpp\
 	SPH.cpp
 	
 
