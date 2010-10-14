@@ -56,7 +56,7 @@ SmoothedParticle::~SmoothedParticle()
 	delete color;
 }
 
-//getters
+//setters
 void SmoothedParticle::setPostion(vector<double> *newPosition)
 {
 	if(newPosition != position)
@@ -100,30 +100,32 @@ void SmoothedParticle::setPressureScale(float newScale)
 	pressureScale = newScale;
 }
 
-//setters  ***************************************************************
+void SmoothedParticle::setDL(GLuint newDL){DL = newDL;}
+
+//getters  ***************************************************************
 vector<double>* SmoothedParticle::getPostition()
 {
 	vector <double> *tempV = new vector <double> (*position);
 	return tempV;
 }
 
-vector<int>* SmoothedParticle::SmoothedParticle::getColor()
+vector<int>* SmoothedParticle::getColor()
 {
 	vector<int>* tempV = new vector<int> (*color);
 	return tempV;
 
 }
 
-uVect* SmoothedParticle::SmoothedParticle::getVelocity()
+uVect* SmoothedParticle::getVelocity()
 {
 	uVect *tempU = new uVect(*velocity);
 	return tempU;
 }
-double SmoothedParticle::SmoothedParticle::getRadius(){return radius;}
-double SmoothedParticle::SmoothedParticle::getMass(){return mass;}
-double SmoothedParticle::SmoothedParticle::getMaterialID(){return materialID;}
-float SmoothedParticle::SmoothedParticle::getPressurescale(){return pressureScale;}
-
+double SmoothedParticle::getRadius(){return radius;}
+double SmoothedParticle::getMass(){return mass;}
+double SmoothedParticle::getMaterialID(){return materialID;}
+float SmoothedParticle::getPressurescale(){return pressureScale;}
+GLuint SmoothedParticle::getDL(){return DL;}
 
 
 

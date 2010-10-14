@@ -58,7 +58,7 @@ class ogl
 		static void idle(void);					//OpenGL idle callback. No idle calculations are implemented... yet
 		static void display(void);				//OpenGL display call back.  Handles all rendering
 		static void reshape(int w, int h);			//OpenGL window reshape callback
-
+		static void initWorld();
 
 
 /*Disabled until needed*/
@@ -77,7 +77,7 @@ class ogl
 		ogl();
 		~ogl();
 		virtual int Start(int argc, char** argv);			//This functions is called to start the program.  Mostly just a generic glut initialization function.
-     	
+
 
 };
 

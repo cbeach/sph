@@ -46,6 +46,7 @@ class SmoothedParticle
 		double 	radius;
 		double 	mass;
 		int 	materialID;
+		GLuint	DL;
 
 		//The color and shape
 		vector <int>	*color;
@@ -69,7 +70,7 @@ class SmoothedParticle
 		SmoothedParticle(const SmoothedParticle&);
 		~SmoothedParticle();
 		
-		//getters
+		//setters
 		virtual void setPostion(vector<double>*);
 		virtual void setVelocity(uVect*);
 		virtual void setRadius(double);
@@ -77,8 +78,9 @@ class SmoothedParticle
 		virtual void setMaterialID(double);
 		virtual void setColor(vector<int>*);
 		virtual void setPressureScale(float);
+		virtual void setDL(GLuint);
 
-		//setters
+		//getters
 		virtual vector<double>* getPostition();
 		virtual uVect* getVelocity();
 		virtual double getRadius();
@@ -86,6 +88,7 @@ class SmoothedParticle
 		virtual double getMaterialID();
 		virtual vector<int>* getColor();
 		virtual float getPressurescale();
+		virtual GLuint getDL();
 };
 
 #endif

@@ -14,8 +14,8 @@ ogl is used as a OpenGL controller.  ogl is responsible for managing all openGL 
 #include <GL/glut.h>
 
 
-#include <render/ogl.h>
-#include <util/uVect.h>
+#include <./render/ogl.h>
+#include <./util/uVect.h>
 
 #define GLUT_SCROLL_UP 		3	//Used in the mouseButtonEvent callback.  freeglut has functionality for mouse scolling, but aparently not the defines.
 #define GLUT_SCROLL_DOWN	4	//so I added them to make my code more readable.
@@ -70,6 +70,15 @@ void ogl::init(void)		//enable texture, lighting, shading.
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ambient);
 	glEnable(GL_COLOR_MATERIAL);
 	glShadeModel(GL_SMOOTH);
+
+}
+
+void ogl::initWorld()
+{
+
+
+
+
 
 }
 
@@ -279,8 +288,4 @@ int ogl::Start(int argc, char** argv)	//initialize glut and set all of the call 
 
 }
  
-
-
-
-
 
