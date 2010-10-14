@@ -16,8 +16,7 @@ int main(int argc, char* argv[])
 	uVect *vect = new uVect(1,0,0,SPHERICAL);
 	ogl sph;
 
-//	sph.Start(argc, argv);
-	SmoothedParticle sp;
+	sph.Start(argc, argv);
 	
 
 	return 0;

@@ -56,6 +56,15 @@ SmoothedParticle::~SmoothedParticle()
 	delete color;
 }
 
+void SmoothedParticle::display()
+{
+	if(DL != 0)
+		glCallList(DL);
+		
+}
+
+
+
 //setters
 void SmoothedParticle::setPostion(vector<double> *newPosition)
 {

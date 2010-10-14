@@ -15,6 +15,12 @@ force must be calculated a uVect is used.
 
 using namespace std;
 
+#define PI 3.1415926535898
+#define G 9.80665  //m/s^2
+
+#define DEGTORAD(x) x*PI/180.0
+#define RADTODEG(x) x*180.0/PI
+
 #define	SPHERICAL	0
 #define	CARTESIAN	1
 #define	CYLINDRICAL	2

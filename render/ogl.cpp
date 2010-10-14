@@ -13,7 +13,7 @@ ogl is used as a OpenGL controller.  ogl is responsible for managing all openGL 
 #include <GL/freeglut.h>
 #include <GL/glut.h>
 
-
+#include <particle/sph.h>
 #include <./render/ogl.h>
 #include <./util/uVect.h>
 
@@ -32,6 +32,7 @@ vector	<int> *ogl::mousePosition;
 
 rect	*ogl::viewPaneSize;
 
+sph 	*ogl::hydro;
 
 /************************************************************************/
 
@@ -43,6 +44,8 @@ ogl::ogl()
 	ogl::cameraOrientation = new uVect(0,0,1,0);
 	ogl::viewPaneSize = new rect;
 	
+	ogl::hydro = new sph(2);
+
 	for(int i = 0;i<3;i++)
 	{
 		ogl::cameraPosition->at(i) = 0;
@@ -107,8 +110,8 @@ void ogl::display(void)		//this is the meat of the program.  ogl::display orchis
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//clear the color and depth buffers
 	glLoadIdentity();						
 	
-//	gluLookAt(0.0,0.0,zOffset,masterTranslation[0],masterTranslation[1],0.0,0.0,1.0,0.0);		//set the cammera's position
-
+	gluLookAt(0.0,0.0,5.0,0.0,0.0,0.0,0.0,1.0,0.0);		//set the cammera's position
+	hydro->display();
 
 	glutSwapBuffers();			//swap the buffer
 }
@@ -282,6 +285,7 @@ int ogl::Start(int argc, char** argv)	//initialize glut and set all of the call 
 //	glutMotionFunc(mouseActiveMove);		//the mouse moved while a button was pressed
 //	glutPassiveMotionFunc(mousePassiveMove);	//regular mouse movement
 
+	cout << "should start running now" << endl;
 	//Lets get started!
 	glutMainLoop();
 

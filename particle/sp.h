@@ -89,6 +89,8 @@ class SmoothedParticle
 		virtual vector<int>* getColor();
 		virtual float getPressurescale();
 		virtual GLuint getDL();
+
+		virtual void display();
 };
 
 #endif

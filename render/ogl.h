@@ -13,10 +13,11 @@ server.  The ogl will handle all user interaction and graphics.
 #include <GL/glut.h>
 #include <GL/gl.h>
 #include <iostream>
-#include <vector>
+//#include <vector>
 #include <math.h>
 
 class uVect;
+class sph;
 
 using namespace std;
 
@@ -34,7 +35,7 @@ class ogl
 
 	protected:
 
-//		sph hydro;
+		static sph *hydro;
 //		vector <mesh> objects;
 		static vector <double> *cameraPosition;
 		static uVect *cameraOrientation;

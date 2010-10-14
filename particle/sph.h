@@ -15,6 +15,17 @@ sph is responsible for orginization of a group of smooth particles.
 
 #include <vector>
 
+#include <particle/sp.h>
+
+struct VERTICES
+{
+	int X;
+	int Y;
+	int Z;
+	double U;
+	double V;
+};
+
 
 class sph
 {
@@ -24,20 +35,12 @@ class sph
 //		vector <double>			metaMesh;
 		vector <GLuint> 		*dls;
 		
-		struct VERTICES
-		{
-			int X;
-			int Y;
-			int Z;
-			double U;
-			double V;
-		};
 
-		virtual void createDL(int, VERTECES, int VertexCount);
+		virtual void createDL(int, int VertexCount);
 
 		//The Following functions were taken from
 		//http://www.swiftless.com/tutorials/opengl/sphere.html
-		virtual void DisplaySphere(double R);
+		virtual void DisplaySphere(double R, int VertexCount, VERTICES*);
 		virtual VERTICES* createSphere(double radius, double x, double y, double z, int space);	
 
 	public:
@@ -49,3 +52,5 @@ class sph
 		virtual void display();
 
 };
+
+#endif

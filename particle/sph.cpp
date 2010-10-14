@@ -16,7 +16,8 @@ sph is responsible for orginization of a group of smooth particles.
 #include <iostream>
 #include <vector>
 
-
+#include <particle/sph.h>
+#include <util/uVect.h>
 
 sph::sph()
 {
@@ -32,7 +33,9 @@ sph::sph(int particles)
 	for(int i = 0; i<particles;i++)
 	{
 		material->at(i) = new SmoothedParticle();
+		material->at(i)->setDL(dls->at(1));
 	}
+
 }
 
 sph::~sph()
@@ -62,7 +65,7 @@ void sph::display()
 			else
 			{
 				cout << "caught exception " << str << " ending program" << endl;
-				exit();
+				exit(1);
 			}
 
 		}
@@ -73,13 +76,13 @@ void sph::display()
 
 }
 
-void sph::createDL(int index, int spacing)
+void sph::createDL(int index, int space)
 {
 	
 	int VertexCount = (90/space)*(360/space)*4;
 	VERTICES *VERTEX = createSphere(1,0.0,0.0,0.0,10);
 	glNewList(dls->at(index),GL_COMPILE);
-	DisplaySphere(1,VertexCount,VERTEX);	
+	DisplaySphere(1.0,VertexCount,VERTEX);	
 	glEndList();
 
 	delete[] VERTEX;
@@ -92,20 +95,20 @@ void sph::DisplaySphere (double R, int VertexCount, VERTICES *VERTEX)
 	int b;
 	glScalef (0.0125 * R, 0.0125 * R, 0.0125 * R);
 	glRotatef (90, 1, 0, 0);
-	glBindTexture (GL_TEXTURE_2D, *planetTex );
+//	glBindTexture (GL_TEXTURE_2D, *planetTex );
 	glBegin (GL_TRIANGLE_STRIP);
 
 	for(b=0;b<=VertexCount;b++)
 	{
 		glTexCoord2f (VERTEX[b].U, VERTEX[b].V);
-		glVertex3f (VERTEX[b].X, VERTEX[b].Y, -VERTEX[b].Z);
+//		glVertex3f (VERTEX[b].X, VERTEX[b].Y, -VERTEX[b].Z);
 	}
 
 
 	for(b = 0;b<=VertexCount;b++)
 	{
 		glTexCoord2f (VERTEX[b].U, -VERTEX[b].V);
-		glVertex3f (VERTEX[b].X, VERTEX[b].Y, VERTEX[b].Z);
+//		glVertex3f (VERTEX[b].X, VERTEX[b].Y, VERTEX[b].Z);
 	}
 	    
 	glEnd();
@@ -125,7 +128,7 @@ VERTICES* sph::createSphere (double radius, double H, double K, double Z, int sp
 	double b;
 	
 	int VertexCount = (90/space)*(360/space)*4;
-	VERTEX = new VERTICES[VertexCount];
+	VERTICES *VERTEX = new VERTICES[VertexCount];
 
 	n = 0;
 	for( b = 0; b <= 90 - space; b+=space)
