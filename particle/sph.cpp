@@ -28,7 +28,7 @@ sph::sph()
 sph::sph(int particles)
 {
 	dls = new vector <GLuint> (3);
-	dls->at(0) = glGenLists(1);
+//	dls->at(0) = glGenLists(1);
 	createDL(0,10);
 	
 	material = new vector<SmoothedParticle*>(particles);
@@ -137,6 +137,13 @@ void sph::DisplaySphere (double R, int VertexCount, VERTICES *VERTEX)
 /*************************************************************************
 The createSphere function was copied from 
 http://www.swiftless.com/tutorials/opengl/sphere.html
+
+Now new and Improved!
+There was an error in the original code which created a plane that 
+extended north and south from the sphere's meridian.  This was likely
+due to floating point rounding errors which would cause the triangle
+strip's ends not to meet.  With the addition of the new if blocks this
+should be fixed.
 *************************************************************************/
 VERTICES* sph::createSphere (double radius, double H, double K, double Z, int space) 
 {
@@ -170,22 +177,41 @@ VERTICES* sph::createSphere (double radius, double H, double K, double Z, int sp
 			VERTEX[n].V = (2 * (b + space)) / 360;
 			VERTEX[n].U = (a) / 360;
 			n++;
+			
+			if (a < 360 -space)			//this is an added conditional
+			{					//if this is not the end of the strip, business as usual
+				VERTEX[n].X = radius * sin((a + space) / 180 * PI) * sin((b) / 180 * PI) - H;
+				VERTEX[n].Y = radius * cos((a + space) / 180 * PI) * sin((b) / 180 * PI) + K;
+				VERTEX[n].Z = radius * cos((b) / 180 * PI) - Z;
+				VERTEX[n].V = (2 * b) / 360;
+				VERTEX[n].U = (a + space) / 360;
+				n++;
 
-			VERTEX[n].X = radius * sin((a + space) / 180 * PI) * sin((b) / 180 * PI) - H;
-			VERTEX[n].Y = radius * cos((a + space) / 180 * PI) * sin((b) / 180 * PI) + K;
-			VERTEX[n].Z = radius * cos((b) / 180 * PI) - Z;
-			VERTEX[n].V = (2 * b) / 360;
-			VERTEX[n].U = (a + space) / 360;
-			n++;
+				VERTEX[n].X = radius * sin((a + space) / 180 * PI) * sin((b + space) /180 * PI) - H;
+				VERTEX[n].Y = radius * cos((a + space) / 180 * PI) * sin((b + space) /180 * PI) + K;
+				VERTEX[n].Z = radius * cos((b + space) / 180 * PI) - Z;
+				VERTEX[n].V = (2 * (b + space)) / 360;
+				VERTEX[n].U = (a + space) / 360;
+				n++;
+			}
+			else if (a >= 360 - space)		//however if the end of the strip has been reached, set the two end points 
+			{					//to be equal to the two begining points.
+				VERTEX[n].X = VERTEX[0].X;
+				VERTEX[n].Y = VERTEX[0].Y;
+				VERTEX[n].Z = VERTEX[0].Z;
+				VERTEX[n].V = VERTEX[0].U;
+				VERTEX[n].U = VERTEX[0].V;
+				n++;
 
-			VERTEX[n].X = radius * sin((a + space) / 180 * PI) * sin((b + space) /180 * PI) - H;
-			VERTEX[n].Y = radius * cos((a + space) / 180 * PI) * sin((b + space) /180 * PI) + K;
-			VERTEX[n].Z = radius * cos((b + space) / 180 * PI) - Z;
-			VERTEX[n].V = (2 * (b + space)) / 360;
-			VERTEX[n].U = (a + space) / 360;
-			n++;
+				VERTEX[n].X = VERTEX[1].X;
+				VERTEX[n].Y = VERTEX[1].Y;
+				VERTEX[n].Z = VERTEX[1].Z;
+				VERTEX[n].V = VERTEX[1].U;
+				VERTEX[n].U = VERTEX[1].V;
+				n++;
 
 
+			}
 
 		}
 	}
