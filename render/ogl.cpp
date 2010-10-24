@@ -44,7 +44,6 @@ ogl::ogl()
 	ogl::cameraOrientation = new uVect(0,0,1,0);
 	ogl::viewPaneSize = new rect;
 	
-	ogl::hydro = new sph(2);
 
 	for(int i = 0;i<3;i++)
 	{
@@ -69,7 +68,7 @@ void ogl::init(void)		//enable texture, lighting, shading.
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
-	GLfloat ambient[] = {.5,.5,.5,1.0};
+	GLfloat ambient[] = {1.0,1.0,1.0,1.0};
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ambient);
 	glEnable(GL_COLOR_MATERIAL);
 	glShadeModel(GL_SMOOTH);
@@ -110,7 +109,7 @@ void ogl::display(void)		//this is the meat of the program.  ogl::display orchis
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//clear the color and depth buffers
 	glLoadIdentity();						
 	
-	gluLookAt(0.0,0.0,5.0,0.0,0.0,0.0,0.0,1.0,0.0);		//set the cammera's position
+	gluLookAt(0.0,0.0,50.0,0.0,0.0,0.0,0.0,1.0,0.0);		//set the cammera's position
 	hydro->display();
 
 	glutSwapBuffers();			//swap the buffer
@@ -284,11 +283,11 @@ int ogl::Start(int argc, char** argv)	//initialize glut and set all of the call 
 //	glutMouseFunc(mouseButtonEvent);		//mouse button was pressed or realeased
 //	glutMotionFunc(mouseActiveMove);		//the mouse moved while a button was pressed
 //	glutPassiveMotionFunc(mousePassiveMove);	//regular mouse movement
-
-	cout << "should start running now" << endl;
+		
+	ogl::hydro = new sph(5);
 	//Lets get started!
 	glutMainLoop();
-
+	
 
 }
  

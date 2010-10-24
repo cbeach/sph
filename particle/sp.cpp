@@ -58,9 +58,15 @@ SmoothedParticle::~SmoothedParticle()
 
 void SmoothedParticle::display()
 {
+	glPushMatrix();
+	glColor4f(1.0,1.0,1.0,0.0);
+	glTranslated(0.0,0.0,-5.0);
+//	cout << "about to print DL" << endl;
 	if(DL != 0)
+	{
 		glCallList(DL);
-		
+	}
+	glPopMatrix();
 }
 
 

@@ -28,12 +28,14 @@ sph::sph()
 sph::sph(int particles)
 {
 	dls = new vector <GLuint> (3);
-	createDL(1,10);
+	dls->at(0) = glGenLists(1);
+	createDL(0,10);
+	
 	material = new vector<SmoothedParticle*>(particles);
 	for(int i = 0; i<particles;i++)
 	{
 		material->at(i) = new SmoothedParticle();
-		material->at(i)->setDL(dls->at(1));
+		material->at(i)->setDL(dls->at(0));
 	}
 
 }
@@ -42,7 +44,7 @@ sph::~sph()
 {
 	delete material;
 //	delete metaMesh;
-	delete dls;
+//	delete dls;
 
 }
 
@@ -56,12 +58,24 @@ void sph::display()
 	{
 		try
 		{
-			material->at(index)->display();
+		
+//			createDL(0,10);
+			if(index < material->capacity())
+			{
+				if(material->at(index))
+				{
+					material->at(index)->display();
+				}
+				index++;
+			}
 		}
 		catch(char *str)
 		{
 			if(strcmp(str, "out_of_range"))
+			{
+				cont = false;
 				break;
+			}
 			else
 			{
 				cout << "caught exception " << str << " ending program" << endl;
@@ -69,6 +83,8 @@ void sph::display()
 			}
 
 		}
+		if(index >= 2)
+			cont = false;
 
 
 	}
@@ -80,9 +96,12 @@ void sph::createDL(int index, int space)
 {
 	
 	int VertexCount = (90/space)*(360/space)*4;
-	VERTICES *VERTEX = createSphere(1,0.0,0.0,0.0,10);
+	VERTICES *VERTEX = createSphere(2,0.0,0.0,0.0,10);
+	cout << "before " << dls->at(index) << endl;
+	dls->at(index) = glGenLists(1);
+	cout << "after " << dls->at(index) << endl;
 	glNewList(dls->at(index),GL_COMPILE);
-	DisplaySphere(1.0,VertexCount,VERTEX);	
+		DisplaySphere(10.0,VertexCount,VERTEX);	
 	glEndList();
 
 	delete[] VERTEX;
@@ -100,20 +119,19 @@ void sph::DisplaySphere (double R, int VertexCount, VERTICES *VERTEX)
 
 	for(b=0;b<=VertexCount;b++)
 	{
-		glTexCoord2f (VERTEX[b].U, VERTEX[b].V);
-//		glVertex3f (VERTEX[b].X, VERTEX[b].Y, -VERTEX[b].Z);
+//		glTexCoord2f (VERTEX[b].U, VERTEX[b].V);
+		glVertex3f (VERTEX[b].X, VERTEX[b].Y, -VERTEX[b].Z);
 	}
 
 
 	for(b = 0;b<=VertexCount;b++)
 	{
-		glTexCoord2f (VERTEX[b].U, -VERTEX[b].V);
-//		glVertex3f (VERTEX[b].X, VERTEX[b].Y, VERTEX[b].Z);
+//		glTexCoord2f (VERTEX[b].U, -VERTEX[b].V);
+		glVertex3f (VERTEX[b].X, VERTEX[b].Y, VERTEX[b].Z);
 	}
 	    
 	glEnd();
 }
-
 
 
 /*************************************************************************

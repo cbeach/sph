@@ -33,9 +33,8 @@ class sph
 
 		vector <SmoothedParticle*> 	*material;
 //		vector <double>			metaMesh;
-		vector <GLuint> 		*dls;
+		vector <GLuint>		 	*dls;
 		
-
 		virtual void createDL(int, int VertexCount);
 
 		//The Following functions were taken from
@@ -48,7 +47,7 @@ class sph
 		sph(int);
 		sph(const sph&);
 		~sph();
-			
+//		VERTECIES *VERTEX			
 		virtual void display();
 
 };
