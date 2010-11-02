@@ -12,9 +12,13 @@ sph is responsible for orginization of a group of smooth particles.
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <iostream>
 #include <vector>
+#include <ctime>
+
+#include <timer.hpp>
 
 #include <particle/sph.h>
 #include <util/uVect.h>
@@ -22,73 +26,77 @@ sph is responsible for orginization of a group of smooth particles.
 sph::sph()
 {
 	dls = new vector <GLuint> (3);
+	frameTimer = new timer;
+	timeLastFrame = frameTimer->elapsed();
 	createDL(1,10);	
 }
 
 sph::sph(int particles)
 {
+	particleCount = particles;
 	dls = new vector <GLuint> (3);
 //	dls->at(0) = glGenLists(1);
 	createDL(0,10);
 	
 	material = new vector<SmoothedParticle*>(particles);
-	for(int i = 0; i<particles;i++)
+	for(int i = 0; i < particles; i++)
 	{
+		cout << i << endl;
 		material->at(i) = new SmoothedParticle();
 		material->at(i)->setDL(dls->at(0));
+		material->at(i)->setPosition(0.0,(double)i,-5.0);
 	}
-
+	frameTimer = new timer;
+	timeLastFrame = frameTimer->elapsed();
 }
 
 sph::~sph()
 {
 	delete material;
 //	delete metaMesh;
-//	delete dls;
+	delete dls;
 
 }
 
-void sph::display()
+void sph::display(clock_t currentTime)
 {
 	int index = 0;
 	bool cont = true;
-	
-
-	while(cont == true)
+	if (frameTimer->elapsed() - timeLastFrame != 0)
 	{
-		try
+		while (cont == true)
 		{
-		
-//			createDL(0,10);
-			if(index < material->capacity())
+			try
 			{
-				if(material->at(index))
+				if(index < material->capacity())
 				{
-					material->at(index)->display();
+					if(material->at(index))
+					{
+						material->at(index)->display();
+					}
+					index++;
 				}
-				index++;
 			}
-		}
-		catch(char *str)
-		{
-			if(strcmp(str, "out_of_range"))
+			catch(char *str)
 			{
+				if(strcmp(str, "out_of_range"))
+				{
+					cont = false;
+					break;
+				}
+				else
+				{
+					cout << "caught exception " << str << " ending program" << endl;
+					exit(1);
+				}
+
+			}
+			if(index >= particleCount)
 				cont = false;
-				break;
-			}
-			else
-			{
-				cout << "caught exception " << str << " ending program" << endl;
-				exit(1);
-			}
+
 
 		}
-		if(index >= 2)
-			cont = false;
-
-
 	}
-
 
 }
 
@@ -97,9 +105,7 @@ void sph::createDL(int index, int space)
 	
 	int VertexCount = (90/space)*(360/space)*4;
 	VERTICES *VERTEX = createSphere(2,0.0,0.0,0.0,10);
-	cout << "before " << dls->at(index) << endl;
 	dls->at(index) = glGenLists(1);
-	cout << "after " << dls->at(index) << endl;
 	glNewList(dls->at(index),GL_COMPILE);
 		DisplaySphere(10.0,VertexCount,VERTEX);	
 	glEndList();
@@ -117,18 +123,18 @@ void sph::DisplaySphere (double R, int VertexCount, VERTICES *VERTEX)
 //	glBindTexture (GL_TEXTURE_2D, *planetTex );
 	glBegin (GL_TRIANGLE_STRIP);
 
-	for(b=0;b<=VertexCount;b++)
-	{
-//		glTexCoord2f (VERTEX[b].U, VERTEX[b].V);
-		glVertex3f (VERTEX[b].X, VERTEX[b].Y, -VERTEX[b].Z);
-	}
+		for(b=0;b<=VertexCount;b++)
+		{
+	//		glTexCoord2f (VERTEX[b].U, VERTEX[b].V);
+			glVertex3f (VERTEX[b].X, VERTEX[b].Y, -VERTEX[b].Z);
+		}
 
 
-	for(b = 0;b<=VertexCount;b++)
-	{
-//		glTexCoord2f (VERTEX[b].U, -VERTEX[b].V);
-		glVertex3f (VERTEX[b].X, VERTEX[b].Y, VERTEX[b].Z);
-	}
+		for(b = 0;b<=VertexCount;b++)
+		{
+	//		glTexCoord2f (VERTEX[b].U, -VERTEX[b].V);
+			glVertex3f (VERTEX[b].X, VERTEX[b].Y, VERTEX[b].Z);
+		}
 	    
 	glEnd();
 }

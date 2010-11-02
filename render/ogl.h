@@ -35,13 +35,15 @@ class ogl
 
 	protected:
 
-		static sph *hydro;
-//		vector <mesh> objects;
-		static vector <double> *cameraPosition;
-		static uVect *cameraOrientation;
-		static rect *viewPaneSize;
-		static int mouseButtonState;
-		static vector <int> *mousePosition;
+		static sph 		*hydro;
+//		vector <mesh> 		objects;
+		static vector <double> 	*cameraPosition;
+		static uVect 		*cameraOrientation;
+		static rect 		*viewPaneSize;
+		static int 		mouseButtonState;
+		static vector <int> 	*mousePosition;
+		static clock_t 		currentTime;
+		static clock_t		lastTime;
 		
 
 		

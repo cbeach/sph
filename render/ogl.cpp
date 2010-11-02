@@ -6,8 +6,10 @@ Terminus: ogl.h
 ogl is used as a OpenGL controller.  ogl is responsible for managing all openGL related activities.
 *************************************************************************/
 #include <stdlib.h>
+#include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <ctime>
 
 #include <GL/gl.h>
 #include <GL/freeglut.h>
@@ -34,6 +36,8 @@ rect	*ogl::viewPaneSize;
 
 sph 	*ogl::hydro;
 
+clock_t	ogl::currentTime;
+clock_t ogl::lastTime;
 /************************************************************************/
 
 ogl::ogl()
@@ -44,6 +48,8 @@ ogl::ogl()
 	ogl::cameraOrientation = new uVect(0,0,1,0);
 	ogl::viewPaneSize = new rect;
 	
+	ogl::currentTime = clock();
+	ogl::lastTime = 0;
 
 	for(int i = 0;i<3;i++)
 	{
@@ -102,17 +108,19 @@ void ogl::idle(void)
 void ogl::display(void)		//this is the meat of the program.  ogl::display orchistrates all of the rendering done by the entire program
 {
 	using namespace std;
-
-
-	
+	currentTime = clock();	
+//	cout << CLOCKS_PER_SEC << ": " << 
+//	printf("%f\n",(double)(currentTime)/(double)(CLOCKS_PER_SEC));
+//	usleep(1000000);
 	glClearColor(0.0,0.0,0.0,1.0);					//clear the background clear color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//clear the color and depth buffers
 	glLoadIdentity();						
 	
 	gluLookAt(0.0,0.0,50.0,0.0,0.0,0.0,0.0,1.0,0.0);		//set the cammera's position
-	hydro->display();
+	hydro->display(currentTime);
 
 	glutSwapBuffers();			//swap the buffer
+	currentTime = lastTime;
 }
 
 

@@ -13,9 +13,15 @@ sph is responsible for orginization of a group of smooth particles.
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 
+#include <timer.hpp>
+
 #include <vector>
 
 #include <particle/sp.h>
+
+//class timer;
+
+using namespace boost;
 
 struct VERTICES
 {
@@ -34,7 +40,10 @@ class sph
 		vector <SmoothedParticle*> 	*material;
 //		vector <double>			metaMesh;
 		vector <GLuint>		 	*dls;
-		
+		int				particleCount;
+		timer				*frameTimer;
+		double				timeLastFrame;
+
 		virtual void createDL(int, int VertexCount);
 
 		//The Following functions were taken from
@@ -48,7 +57,7 @@ class sph
 		sph(const sph&);
 		~sph();
 //		VERTECIES *VERTEX			
-		virtual void display();
+		virtual void display(time_t currentTime);
 
 };
 

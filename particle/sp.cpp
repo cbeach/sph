@@ -60,8 +60,8 @@ void SmoothedParticle::display()
 {
 	glPushMatrix();
 	glColor4f(1.0,1.0,1.0,0.0);
-	glTranslated(0.0,0.0,-5.0);
-//	cout << "about to print DL" << endl;
+	glTranslated(position->at(0), position->at(1), position->at(2));
+
 	if(DL != 0)
 	{
 		glCallList(DL);
@@ -72,13 +72,12 @@ void SmoothedParticle::display()
 
 
 //setters
-void SmoothedParticle::setPostion(vector<double> *newPosition)
+void SmoothedParticle::setPosition(double x, double y, double z)
 {
-	if(newPosition != position)
-	{
-		delete position;
-		position = newPosition;
-	}
+	position->at(0) = x;
+	position->at(1) = y;
+	position->at(2) = z;
+
 
 }
 
@@ -141,6 +140,14 @@ double SmoothedParticle::getMass(){return mass;}
 double SmoothedParticle::getMaterialID(){return materialID;}
 float SmoothedParticle::getPressurescale(){return pressureScale;}
 GLuint SmoothedParticle::getDL(){return DL;}
+
+uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
+{
+
+
+
+
+}
 
 
 

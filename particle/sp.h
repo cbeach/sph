@@ -46,12 +46,21 @@ class SmoothedParticle
 		double 	radius;
 		double 	mass;
 		int 	materialID;
-		GLuint	DL;
+
+		double thresHold;	//thresHold distance between attractive and repulsive
+		double stretchR;	//stretctes the attractive force curve
+		double stretchA;	//stretches the repulsive force curve
+		double offsetR;		//the x-axis translation for the repulsive curve
+		double offsetA;		//the x-axis translation for the attractive curve
+		double maxR;		//Maximum scalar value for the repulsive force (x^2)
+		double maxA;		//maximum scalar value for the attractive force (x^2)
+
+		GLuint	DL;		//this is the pointer to the SP's display list
 
 		//The color and shape
-		vector <int>	*color;
-		float	pressureScale;
-		GLuint	sphereDL;
+		vector <int>	*color;	//the color of the smooth particle
+		float	pressureScale;	//the rate at which the particle turns color
+//		GLuint	sphereDL;
 
 		//These variables are used for ray tracing
 //		double alpha;
@@ -71,7 +80,7 @@ class SmoothedParticle
 		~SmoothedParticle();
 		
 		//setters
-		virtual void setPostion(vector<double>*);
+		virtual void setPosition(double,double,double);
 		virtual void setVelocity(uVect*);
 		virtual void setRadius(double);
 		virtual void setMass(double);
@@ -91,6 +100,9 @@ class SmoothedParticle
 		virtual GLuint getDL();
 
 		virtual void display();
+		virtual uVect* getForceAtPoint(double,double,double);
+
+				
 };
 
 #endif
