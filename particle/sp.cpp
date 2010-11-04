@@ -22,7 +22,9 @@ particle at a certain point.
 
 
 
-SmoothedParticle::SmoothedParticle():radius(1),mass(1),materialID(WATER)
+SmoothedParticle::SmoothedParticle():radius(1),mass(1),materialID(WATER),
+threshold(0.5),stretchR(1),stretchA(1),offsetR(0),offsetA(0),maxR(100),
+maxA(-100)
 {
 	position = new vector <double> (3);
 	neighbors = new vector<SmoothedParticle*> (10);
@@ -143,9 +145,26 @@ GLuint SmoothedParticle::getDL(){return DL;}
 
 uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
 {
+	double distance = 
+		sqrt(abs((x-position->at(0))*(x-position->at(0))+
+			(x-position->at(0))*(x-position->at(0))+
+			(x-position->at(0))*(x-position->at(0))));
+	double force = 0;
 
+	if (distance > threshold)
+	{
+		force = stretchA(-1.0/((distance - offsetA)*(distance - offsetA)));
+	}
+	else if (distance < threshold)
+	{
+		force = stretchA(1.0/((distance - offsetA)*(distance - offsetA)));
+	}
+	else if (distance == threshold)
+	{
+		//do nothing, no attraction or repulsion.  force = 0;
+	}
 
-
+	//find vector
 
 }
 

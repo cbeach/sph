@@ -47,7 +47,7 @@ class SmoothedParticle
 		double 	mass;
 		int 	materialID;
 
-		double thresHold;	//thresHold distance between attractive and repulsive
+		double threshold;	//thresHold distance between attractive and repulsive
 		double stretchR;	//stretctes the attractive force curve
 		double stretchA;	//stretches the repulsive force curve
 		double offsetR;		//the x-axis translation for the repulsive curve
