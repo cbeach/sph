@@ -15,11 +15,13 @@ server.  The ogl will handle all user interaction and graphics.
 #include <iostream>
 //#include <vector>
 #include <math.h>
+#include <timer.hpp>
 
 class uVect;
 class sph;
 
 using namespace std;
+using namespace boost;
 
 struct rect
 {
@@ -42,9 +44,7 @@ class ogl
 		static rect 		*viewPaneSize;
 		static int 		mouseButtonState;
 		static vector <int> 	*mousePosition;
-		static clock_t 		currentTime;
-		static clock_t		lastTime;
-		
+		static timer		*timeSinceStart;	
 
 		
 

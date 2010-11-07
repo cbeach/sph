@@ -50,6 +50,7 @@ class sph
 		//http://www.swiftless.com/tutorials/opengl/sphere.html
 		virtual void DisplaySphere(double R, int VertexCount, VERTICES*);
 		virtual VERTICES* createSphere(double radius, double x, double y, double z, int space);	
+		virtual void applyForces(double timeDiff);
 
 	public:
 		sph();
@@ -57,7 +58,8 @@ class sph
 		sph(const sph&);
 		~sph();
 //		VERTECIES *VERTEX			
-		virtual void display(time_t currentTime);
+		virtual void display();
+		virtual void setTimer(timer*);
 
 };
 

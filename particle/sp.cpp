@@ -11,7 +11,7 @@ particle at a certain point.
 
 #include <iostream>
 #include <vector>
-#include <math.h>
+#include <cmath>
 
 #include <GL/gl.h>
 #include <GL/freeglut.h>
@@ -33,7 +33,7 @@ maxA(-100)
 }
 
 
-SmoothedParticle::SmoothedParticle(const SmoothedParticle& clone)
+SmoothedParticle::SmoothedParticle(const SmoothedParticle& clone):radius(1),mass(1),materialID(WATER),threshold(0.5),stretchR(1),stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100)
 {
 	position = new vector<double> (*clone.position);
 	neighbors = new vector<SmoothedParticle*> (*clone.neighbors);
@@ -145,28 +145,52 @@ GLuint SmoothedParticle::getDL(){return DL;}
 
 uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
 {
-	double distance = 
-		sqrt(abs((x-position->at(0))*(x-position->at(0))+
-			(x-position->at(0))*(x-position->at(0))+
-			(x-position->at(0))*(x-position->at(0))));
+	double diffX = position->at(0) - x;
+	double diffY = position->at(1) - y;
+	double diffZ = position->at(2) - z;	
+
+	double distance = sqrt(abs( diffX*diffX + diffY*diffY + diffZ*diffZ));
 	double force = 0;
 
 	if (distance > threshold)
 	{
-		force = stretchA(-1.0/((distance - offsetA)*(distance - offsetA)));
+		force = stretchA*(-1.0/((distance - offsetA)*(distance - offsetA)));
 	}
 	else if (distance < threshold)
 	{
-		force = stretchA(1.0/((distance - offsetA)*(distance - offsetA)));
+		force = stretchA*(1.0/((distance - offsetA)*(distance - offsetA)));
 	}
 	else if (distance == threshold)
 	{
 		//do nothing, no attraction or repulsion.  force = 0;
 	}
 
-	//find vector
+	double xComponent = diffX/distance;
+	double yComponent = diffY/distance;
+	double zComponent = diffZ/distance;
+	
+	uVect *tempUVect = new uVect(force*xComponent, force*yComponent, force*zComponent, 1);
 
+	return tempUVect;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

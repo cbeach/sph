@@ -9,7 +9,7 @@ ogl is used as a OpenGL controller.  ogl is responsible for managing all openGL 
 #include <stdio.h>
 #include <iostream>
 #include <vector>
-#include <ctime>
+#include <timer.hpp>
 
 #include <GL/gl.h>
 #include <GL/freeglut.h>
@@ -36,8 +36,7 @@ rect	*ogl::viewPaneSize;
 
 sph 	*ogl::hydro;
 
-clock_t	ogl::currentTime;
-clock_t ogl::lastTime;
+timer	*ogl::timeSinceStart;
 /************************************************************************/
 
 ogl::ogl()
@@ -48,8 +47,7 @@ ogl::ogl()
 	ogl::cameraOrientation = new uVect(0,0,1,0);
 	ogl::viewPaneSize = new rect;
 	
-	ogl::currentTime = clock();
-	ogl::lastTime = 0;
+	ogl::timeSinceStart = new timer();
 
 	for(int i = 0;i<3;i++)
 	{
@@ -83,8 +81,9 @@ void ogl::init(void)		//enable texture, lighting, shading.
 
 void ogl::initWorld()
 {
-
-
+	
+	ogl::hydro = new sph(5);
+	ogl::hydro->setTimer(timeSinceStart);
 
 
 
@@ -108,19 +107,16 @@ void ogl::idle(void)
 void ogl::display(void)		//this is the meat of the program.  ogl::display orchistrates all of the rendering done by the entire program
 {
 	using namespace std;
-	currentTime = clock();	
-//	cout << CLOCKS_PER_SEC << ": " << 
-//	printf("%f\n",(double)(currentTime)/(double)(CLOCKS_PER_SEC));
-//	usleep(1000000);
+
+	
 	glClearColor(0.0,0.0,0.0,1.0);					//clear the background clear color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//clear the color and depth buffers
 	glLoadIdentity();						
 	
 	gluLookAt(0.0,0.0,50.0,0.0,0.0,0.0,0.0,1.0,0.0);		//set the cammera's position
-	hydro->display(currentTime);
+	hydro->display();
 
 	glutSwapBuffers();			//swap the buffer
-	currentTime = lastTime;
 }
 
 
@@ -292,7 +288,7 @@ int ogl::Start(int argc, char** argv)	//initialize glut and set all of the call 
 //	glutMotionFunc(mouseActiveMove);		//the mouse moved while a button was pressed
 //	glutPassiveMotionFunc(mousePassiveMove);	//regular mouse movement
 		
-	ogl::hydro = new sph(5);
+	initWorld();
 	//Lets get started!
 	glutMainLoop();
 	

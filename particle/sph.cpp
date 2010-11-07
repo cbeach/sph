@@ -58,10 +58,22 @@ sph::~sph()
 
 }
 
-void sph::display(clock_t currentTime)
+void sph::applyForces(double timeDiff)
+{
+	cout << timeDiff << endl;
+
+}
+
+
+void sph::display()
 {
 	int index = 0;
 	bool cont = true;
+
+	double currentTime = frameTimer->elapsed();
+	if(currentTime - timeLastFrame > 0)
+		applyForces(currentTime - timeLastFrame);
+
 	if (frameTimer->elapsed() - timeLastFrame != 0)
 	{
 		while (cont == true)
@@ -97,6 +109,7 @@ void sph::display(clock_t currentTime)
 
 		}
 	}
+	timeLastFrame = frameTimer->elapsed();
 
 }
 
@@ -223,3 +236,11 @@ VERTICES* sph::createSphere (double radius, double H, double K, double Z, int sp
 	}
 	return VERTEX;
 }
+
+void sph::setTimer(timer *newTimer)
+{
+
+	frameTimer = newTimer;
+
+}
+
