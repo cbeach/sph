@@ -13,6 +13,7 @@ particle at a certain point.
 
 #include <iostream>
 #include <vector>
+#include <timer.hpp>
 
 #include <GL/gl.h>
 #include <GL/freeglut.h>
@@ -26,6 +27,7 @@ particle at a certain point.
 
 //class vector;
 using namespace std;
+using namespace boost;
 
 struct BindingPoint
 {
@@ -46,6 +48,7 @@ class SmoothedParticle
 		double 	radius;
 		double 	mass;
 		int 	materialID;
+		timer	*frameTimer;
 
 		double threshold;	//thresHold distance between attractive and repulsive
 		double stretchR;	//stretctes the attractive force curve
@@ -90,7 +93,7 @@ class SmoothedParticle
 		virtual void setDL(GLuint);
 
 		//getters
-		virtual vector<double>* getPostition();
+		virtual vector<double>* getPosition();
 		virtual uVect* getVelocity();
 		virtual double getRadius();
 		virtual double getMass();
@@ -101,6 +104,7 @@ class SmoothedParticle
 
 		virtual void display();
 		virtual uVect* getForceAtPoint(double,double,double);
+		virtual void applyForce(uVect &);
 
 				
 };

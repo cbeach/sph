@@ -107,16 +107,17 @@ void ogl::idle(void)
 void ogl::display(void)		//this is the meat of the program.  ogl::display orchistrates all of the rendering done by the entire program
 {
 	using namespace std;
-
+	int success = 0;
 	
 	glClearColor(0.0,0.0,0.0,1.0);					//clear the background clear color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//clear the color and depth buffers
 	glLoadIdentity();						
 	
 	gluLookAt(0.0,0.0,50.0,0.0,0.0,0.0,0.0,1.0,0.0);		//set the cammera's position
-	hydro->display();
+	success = hydro->display();
 
-	glutSwapBuffers();			//swap the buffer
+	if(success)
+		glutSwapBuffers();			//swap the buffer
 }
 
 

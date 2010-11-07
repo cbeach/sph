@@ -58,7 +58,7 @@ class sph
 		sph(const sph&);
 		~sph();
 //		VERTECIES *VERTEX			
-		virtual void display();
+		virtual int display();
 		virtual void setTimer(timer*);
 
 };

@@ -119,7 +119,7 @@ void SmoothedParticle::setPressureScale(float newScale)
 void SmoothedParticle::setDL(GLuint newDL){DL = newDL;}
 
 //getters  ***************************************************************
-vector<double>* SmoothedParticle::getPostition()
+vector<double>* SmoothedParticle::getPosition()
 {
 	vector <double> *tempV = new vector <double> (*position);
 	return tempV;
@@ -174,6 +174,14 @@ uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
 	return tempUVect;
 }
 
+
+void SmoothedParticle::applyForce(uVect &actingForce)
+{
+	double currentTime = frameTimer->elapsed();
+	
+	
+	
+}
 
 
 

@@ -60,21 +60,44 @@ sph::~sph()
 
 void sph::applyForces(double timeDiff)
 {
-	cout << timeDiff << endl;
+	uVect *tempUVect;
+	vector <double> *tempVector;
 
+	for(int i = 0; i < particleCount; i++)
+	{
+		for(int j = 0; j < particleCount; j++)
+		{
+			if(i != j)
+			{
+				tempVector = material->at(j)->getPosition();
+				tempUVect = material->at(i)->getForceAtPoint(
+							tempVector->at(0),
+							tempVector->at(1),
+							tempVector->at(2));
+
+				delete tempVector;
+			}
+		}
+	}
 }
 
 
-void sph::display()
+int sph::display()
 {
 	int index = 0;
+	int success;
 	bool cont = true;
-
+	
 	double currentTime = frameTimer->elapsed();
-	if(currentTime - timeLastFrame > 0)
-		applyForces(currentTime - timeLastFrame);
+	
+	success = 0;
 
-	if (frameTimer->elapsed() - timeLastFrame != 0)
+	if((currentTime - timeLastFrame) > 0)
+	{
+	//	applyForces(currentTime - timeLastFrame);
+	}
+
+	if ((currentTime - timeLastFrame) > 0)
 	{
 		while (cont == true)
 		{
@@ -107,10 +130,11 @@ void sph::display()
 				cont = false;
 
 
+			success = 1;
 		}
 	}
 	timeLastFrame = frameTimer->elapsed();
-
+	return success;
 }
 
 void sph::createDL(int index, int space)
