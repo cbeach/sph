@@ -11,7 +11,7 @@ sph is responsible for orginization of a group of smooth particles.
 #include <GL/freeglut.h>
 
 #include <string.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <stdio.h>
 
 #include <iostream>
@@ -35,18 +35,23 @@ sph::sph(int particles)
 {
 	particleCount = particles;
 	dls = new vector <GLuint> (3);
-//	dls->at(0) = glGenLists(1);
+	frameTimer = new timer;
 	createDL(0,10);
+	double randX, randY, randZ;
+	srand(time(0));
 	
 	material = new vector<SmoothedParticle*>(particles);
 	for(int i = 0; i < particles; i++)
 	{
-		cout << i << endl;
+		randX = ((double)rand()/(double)RAND_MAX) * 15.0;
+		randY = ((double)rand()/(double)RAND_MAX) * 15.0;
+		randZ = ((double)rand()/(double)RAND_MAX) * 15.0;
+
 		material->at(i) = new SmoothedParticle();
 		material->at(i)->setDL(dls->at(0));
-		material->at(i)->setPosition(0.0,(double)i,-5.0);
+		material->at(i)->setPosition(randX, randY, randZ);
+		material->at(i)->setMass(5);
 	}
-	frameTimer = new timer;
 	timeLastFrame = frameTimer->elapsed();
 }
 
@@ -61,7 +66,9 @@ sph::~sph()
 void sph::applyForces(double timeDiff)
 {
 	uVect *tempUVect;
-	vector <double> *tempVector;
+	vector <double> *positionVector;
+	vector <double> vel;
+	vector <double> *vel2;
 
 	for(int i = 0; i < particleCount; i++)
 	{
@@ -69,15 +76,42 @@ void sph::applyForces(double timeDiff)
 		{
 			if(i != j)
 			{
-				tempVector = material->at(j)->getPosition();
+				positionVector = material->at(j)->getPosition();
 				tempUVect = material->at(i)->getForceAtPoint(
-							tempVector->at(0),
-							tempVector->at(1),
-							tempVector->at(2));
+							positionVector->at(0),
+							positionVector->at(1),
+							positionVector->at(2));
+				if(tempUVect)
+					vel2 = material->at(i)->applyForce(*tempUVect, timeDiff);
+				delete positionVector;
+				delete tempUVect;
+				if(i == 1)
+				{
+					tempUVect = material->at(i)->getVelocity();
+					 vel = tempUVect->getCartesian();
+					 
 
-				delete tempVector;
+					cout << "i " << vel.at(0) << " " << 
+						"j " << vel.at(1) << " " <<
+						"k " << vel.at(2) << " " <<
+						"l " << vel.at(3) << endl;
+
+					cout << "vel[0] " << vel2->at(0) << " " <<
+						"vel[1] " << vel2->at(1) << " " <<
+						"vel[2] " << vel2->at(2) << endl << endl;
+					delete positionVector;
+					delete tempUVect;
+				}
+
 			}
 		}
+	}
+	for (int i = 0; i < particleCount; i++)
+	{
+		
+//		cout << "here" << endl;
+		material->at(i)->updatePosition(timeDiff);
+
 	}
 }
 
@@ -94,7 +128,7 @@ int sph::display()
 
 	if((currentTime - timeLastFrame) > 0)
 	{
-	//	applyForces(currentTime - timeLastFrame);
+		applyForces(currentTime - timeLastFrame);
 	}
 
 	if ((currentTime - timeLastFrame) > 0)
@@ -107,7 +141,7 @@ int sph::display()
 				{
 					if(material->at(index))
 					{
-						material->at(index)->display();
+						material->at(index)->display(timeLastFrame);
 					}
 					index++;
 				}
@@ -130,10 +164,11 @@ int sph::display()
 				cont = false;
 
 
+			
+			timeLastFrame = frameTimer->elapsed();
 			success = 1;
 		}
 	}
-	timeLastFrame = frameTimer->elapsed();
 	return success;
 }
 

@@ -21,6 +21,8 @@ ogl is used as a OpenGL controller.  ogl is responsible for managing all openGL 
 
 #define GLUT_SCROLL_UP 		3	//Used in the mouseButtonEvent callback.  freeglut has functionality for mouse scolling, but aparently not the defines.
 #define GLUT_SCROLL_DOWN	4	//so I added them to make my code more readable.
+#define PARTICLE_COUNT 105
+
 
 using namespace std;
 
@@ -82,7 +84,7 @@ void ogl::init(void)		//enable texture, lighting, shading.
 void ogl::initWorld()
 {
 	
-	ogl::hydro = new sph(5);
+	ogl::hydro = new sph(PARTICLE_COUNT);
 	ogl::hydro->setTimer(timeSinceStart);
 
 

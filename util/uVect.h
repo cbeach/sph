@@ -38,7 +38,7 @@ class uVect
 {
 	protected:
 		double spherical[3];	//
-		double cartesian[4];	//(r,x,y,z)
+		double cartesian[4];	//(x,y,z,r)
 		double cylindrical[3];	//
 
 		//which coordinate system vector is up to date
@@ -80,6 +80,8 @@ class uVect
 		virtual void updateSpherical();
 		virtual void updateCylindrical();
 		virtual void updateCartesian();
+
+		virtual void normalize();
 };
 
 #endif

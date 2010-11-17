@@ -40,6 +40,9 @@ struct BindingPoint
 class SmoothedParticle
 {
 	protected:
+		
+		double constForceConst;
+	
 		//variables that are needed for basic functioning
 		//physical properties
 		vector <double> *position;
@@ -49,6 +52,8 @@ class SmoothedParticle
 		double 	mass;
 		int 	materialID;
 		timer	*frameTimer;
+		double 	timeLastFrame;
+		double 	forceConstant;
 
 		double threshold;	//thresHold distance between attractive and repulsive
 		double stretchR;	//stretctes the attractive force curve
@@ -91,6 +96,7 @@ class SmoothedParticle
 		virtual void setColor(vector<int>*);
 		virtual void setPressureScale(float);
 		virtual void setDL(GLuint);
+		virtual void setTimer(timer *currentTime);
 
 		//getters
 		virtual vector<double>* getPosition();
@@ -101,11 +107,11 @@ class SmoothedParticle
 		virtual vector<int>* getColor();
 		virtual float getPressurescale();
 		virtual GLuint getDL();
-
-		virtual void display();
+		
+		virtual void display(double);
 		virtual uVect* getForceAtPoint(double,double,double);
-		virtual void applyForce(uVect &);
-
+		virtual vector <double>* applyForce(uVect &, double);
+		virtual void updatePosition(double elapsedTime);
 				
 };
 

@@ -79,10 +79,10 @@ uVect::uVect(double a, double b, double c, int mode)	//obvious constructor
 			spherical[2] = c;
 			break;
 		case 1:
-			cartesian[0] = a*a + b*b + c*c;		//all scalars will be used and scalar^2 for the sake of speed.  Most scalar ops. will be simple comparisons
-			cartesian[1] = a;
-			cartesian[2] = b;
-			cartesian[3] = c;
+			cartesian[0] = a;
+			cartesian[1] = b;
+			cartesian[2] = c;
+			cartesian[3] = a*a + b*b + c*c;		//all scalars will be used and scalar^2 for the sake of speed.  Most scalar ops. will be simple comparisons
 			break;
 		case 2:
 			cylindrical[0] = a;
@@ -102,7 +102,18 @@ uVect::uVect(double a, double b, double c, int mode)	//obvious constructor
 }
 
 
-uVect::~uVect(){}
+uVect::~uVect()
+{
+/*	if(spherical)
+		delete[] spherical;
+	if(cartesian)
+		delete[] cartesian;
+	if(cylindrical)
+		delete[] cylindrical;
+	if(updated)
+		delete[] updated;
+*/
+}
 
 
 
@@ -152,7 +163,7 @@ void uVect::setScalar(double newMag)
 			
 			break;
 		case 1:
-			cartesian[0] = newMag;		//all scalars will be used and scalar^2 for the sake of speed.  Most scalar ops. will be simple comparisons
+			cartesian[3] = newMag;		//all scalars will be used and scalar^2 for the sake of speed.  Most scalar ops. will be simple comparisons
 			break;
 	}
 
@@ -431,4 +442,19 @@ void uVect::updateCartesian()
 		cartesian[1] = spherical[0]*sin(spherical[1])*sin(spherical[2]);
 		cartesian[0] = spherical[0]*cos(spherical[1]);
 	}
+}
+
+void uVect::normalize()
+{
+/*
+	switch(coordSys)
+	{
+		case 0:
+			break
+		case 1:
+
+
+
+	}
+*/
 }

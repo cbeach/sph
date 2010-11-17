@@ -20,11 +20,12 @@ particle at a certain point.
 #include <particle/sp.h>
 #include <util/uVect.h>
 
+#define CONST_FORCE_CONST 1
 
 
 SmoothedParticle::SmoothedParticle():radius(1),mass(1),materialID(WATER),
 threshold(0.5),stretchR(1),stretchA(1),offsetR(0),offsetA(0),maxR(100),
-maxA(-100)
+maxA(-100),forceConstant(CONST_FORCE_CONST)
 {
 	position = new vector <double> (3);
 	neighbors = new vector<SmoothedParticle*> (10);
@@ -33,7 +34,9 @@ maxA(-100)
 }
 
 
-SmoothedParticle::SmoothedParticle(const SmoothedParticle& clone):radius(1),mass(1),materialID(WATER),threshold(0.5),stretchR(1),stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100)
+SmoothedParticle::SmoothedParticle(const SmoothedParticle& clone):radius(1),mass(1),
+materialID(WATER),threshold(0.5),stretchR(1),stretchA(1),offsetR(0),offsetA(0),
+maxR(100),maxA(-100),forceConstant(CONST_FORCE_CONST)
 {
 	position = new vector<double> (*clone.position);
 	neighbors = new vector<SmoothedParticle*> (*clone.neighbors);
@@ -58,8 +61,9 @@ SmoothedParticle::~SmoothedParticle()
 	delete color;
 }
 
-void SmoothedParticle::display()
+void SmoothedParticle::display(double oldFrameTime)
 {
+	timeLastFrame = oldFrameTime;
 	glPushMatrix();
 	glColor4f(1.0,1.0,1.0,0.0);
 	glTranslated(position->at(0), position->at(1), position->at(2));
@@ -117,6 +121,7 @@ void SmoothedParticle::setPressureScale(float newScale)
 }
 
 void SmoothedParticle::setDL(GLuint newDL){DL = newDL;}
+void SmoothedParticle::setTimer(timer *currentTime){frameTimer = currentTime;}
 
 //getters  ***************************************************************
 vector<double>* SmoothedParticle::getPosition()
@@ -149,41 +154,76 @@ uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
 	double diffY = position->at(1) - y;
 	double diffZ = position->at(2) - z;	
 
-	double distance = sqrt(abs( diffX*diffX + diffY*diffY + diffZ*diffZ));
+	double distance = abs( diffX*diffX + diffY*diffY + diffZ*diffZ);
 	double force = 0;
 
-	if (distance > threshold)
+	if (distance > threshold*threshold && distance < 16)
 	{
-		force = stretchA*(-1.0/((distance - offsetA)*(distance - offsetA)));
+		force = stretchA*(-1.0/((distance - offsetA)*(distance - offsetA))) *
+			forceConstant;
 	}
-	else if (distance < threshold)
+	else if (distance < threshold*threshold)
 	{
-		force = stretchA*(1.0/((distance - offsetA)*(distance - offsetA)));
+		force = stretchA*(1.0/((distance - offsetA)*(distance - offsetA))) *
+			forceConstant;
 	}
 	else if (distance == threshold)
 	{
 		//do nothing, no attraction or repulsion.  force = 0;
 	}
-
-	double xComponent = diffX/distance;
-	double yComponent = diffY/distance;
-	double zComponent = diffZ/distance;
 	
-	uVect *tempUVect = new uVect(force*xComponent, force*yComponent, force*zComponent, 1);
+	
+	
+	if(distance != 0)
+	{
+		double xComponent = diffX/distance;
+		double yComponent = diffY/distance;
+		double zComponent = diffZ/distance;
+	
+		uVect *tempUVect = new uVect(xComponent, yComponent, zComponent, 1);
+		tempUVect->setScalar(force);
 
-	return tempUVect;
+		return tempUVect;
+	}
+	return NULL;
 }
 
-
-void SmoothedParticle::applyForce(uVect &actingForce)
+vector <double>* SmoothedParticle::applyForce(uVect &actingForce, double elapsedTime)
 {
-	double currentTime = frameTimer->elapsed();
+	vector <double> force = actingForce.getCartesian();
+	vector <double> *vel = new vector <double> (velocity->getCartesian());
+
+	double acceleration = force.at(3) / mass;
+
+	vel->at(0) += acceleration * force.at(0);
+	vel->at(1) += acceleration * force.at(1);
+	vel->at(2) += acceleration * force.at(2);
+/*	cout << "force: " << force.at(0) << "\t " << 
+		force.at(1) << "\t " <<
+		force.at(2) << "\t " <<
+		force.at(3) << "\t" << 
+		acceleration << endl;*/
 	
+	if(velocity)
+		delete velocity;
 	
-	
+	velocity = new uVect(vel->at(0), vel->at(1), vel->at(2), 1);
+	return vel;
 }
 
+void SmoothedParticle::updatePosition(double elapsedTime)
+{
+	vector <double> vel = velocity->getCartesian();
+/*
+	cout << "position: " << position->at(0) << "\t\t " <<
+		 position->at(1) << "\t\t " <<
+		 position->at(2) << endl;
+*/
+	position->at(0) += vel.at(0) * elapsedTime;	
+	position->at(1) += vel.at(1) * elapsedTime;	
+	position->at(2) += vel.at(2) * elapsedTime;	
 
+}
 
 
 
