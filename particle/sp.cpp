@@ -29,7 +29,7 @@ maxA(-100),forceConstant(CONST_FORCE_CONST)
 {
 	position = new vector <double> (3);
 	neighbors = new vector<SmoothedParticle*> (10);
-	velocity  = new uVect();
+	velocity  = new uVect(0,0,0,1);
 	color = new vector<int> (3);
 }
 
@@ -64,6 +64,8 @@ SmoothedParticle::~SmoothedParticle()
 void SmoothedParticle::display(double oldFrameTime)
 {
 	timeLastFrame = oldFrameTime;
+
+#ifndef SCHOOL
 	glPushMatrix();
 	glColor4f(1.0,1.0,1.0,0.0);
 	glTranslated(position->at(0), position->at(1), position->at(2));
@@ -73,6 +75,8 @@ void SmoothedParticle::display(double oldFrameTime)
 		glCallList(DL);
 	}
 	glPopMatrix();
+#endif
+
 }
 
 
@@ -154,8 +158,10 @@ uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
 	double diffY = position->at(1) - y;
 	double diffZ = position->at(2) - z;	
 
-	double distance = abs( diffX*diffX + diffY*diffY + diffZ*diffZ);
+	double distance = 0;
 	double force = 0;
+	
+	distance = abs( diffX*diffX + diffY*diffY + diffZ*diffZ);
 
 	if (distance > threshold*threshold && distance < 16)
 	{
@@ -190,14 +196,14 @@ uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
 
 vector <double>* SmoothedParticle::applyForce(uVect &actingForce, double elapsedTime)
 {
-	vector <double> force = actingForce.getCartesian();
-	vector <double> *vel = new vector <double> (velocity->getCartesian());
+	vector <double> *force = actingForce.getCartesian();
+	vector <double> *vel = velocity->getCartesian();
 
-	double acceleration = force.at(3) / mass;
+	double acceleration = force->at(3) / mass;
 
-	vel->at(0) += acceleration * force.at(0);
-	vel->at(1) += acceleration * force.at(1);
-	vel->at(2) += acceleration * force.at(2);
+	vel->at(0) += acceleration * force->at(0);
+	vel->at(1) += acceleration * force->at(1);
+	vel->at(2) += acceleration * force->at(2);
 /*	cout << "force: " << force.at(0) << "\t " << 
 		force.at(1) << "\t " <<
 		force.at(2) << "\t " <<
@@ -208,21 +214,24 @@ vector <double>* SmoothedParticle::applyForce(uVect &actingForce, double elapsed
 		delete velocity;
 	
 	velocity = new uVect(vel->at(0), vel->at(1), vel->at(2), 1);
+	delete force;
+
 	return vel;
 }
 
 void SmoothedParticle::updatePosition(double elapsedTime)
 {
-	vector <double> vel = velocity->getCartesian();
+	vector <double> *vel = velocity->getCartesian();
 /*
 	cout << "position: " << position->at(0) << "\t\t " <<
 		 position->at(1) << "\t\t " <<
 		 position->at(2) << endl;
 */
-	position->at(0) += vel.at(0) * elapsedTime;	
-	position->at(1) += vel.at(1) * elapsedTime;	
-	position->at(2) += vel.at(2) * elapsedTime;	
-
+	position->at(0) += vel->at(0) * elapsedTime;	
+	position->at(1) += vel->at(1) * elapsedTime;	
+	position->at(2) += vel->at(2) * elapsedTime;	
+	
+	delete vel;
 }
 
 

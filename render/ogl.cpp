@@ -15,13 +15,15 @@ ogl is used as a OpenGL controller.  ogl is responsible for managing all openGL 
 #include <GL/freeglut.h>
 #include <GL/glut.h>
 
-#include <particle/sph.h>
+#include <./particle/sph.h>
 #include <./render/ogl.h>
 #include <./util/uVect.h>
+#include <instrumentation.h>
 
 #define GLUT_SCROLL_UP 		3	//Used in the mouseButtonEvent callback.  freeglut has functionality for mouse scolling, but aparently not the defines.
 #define GLUT_SCROLL_DOWN	4	//so I added them to make my code more readable.
-#define PARTICLE_COUNT 105
+#define PARTICLE_COUNT 5
+
 
 
 using namespace std;
@@ -87,6 +89,14 @@ void ogl::initWorld()
 	ogl::hydro = new sph(PARTICLE_COUNT);
 	ogl::hydro->setTimer(timeSinceStart);
 
+#ifdef SCHOOL
+	int success = 0;
+	while(success < 10)
+	{
+		if(hydro->display())
+			success++;
+	}
+#endif
 
 
 }
@@ -110,16 +120,19 @@ void ogl::display(void)		//this is the meat of the program.  ogl::display orchis
 {
 	using namespace std;
 	int success = 0;
-	
+#ifndef SCHOOL	
 	glClearColor(0.0,0.0,0.0,1.0);					//clear the background clear color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//clear the color and depth buffers
 	glLoadIdentity();						
 	
 	gluLookAt(0.0,0.0,50.0,0.0,0.0,0.0,0.0,1.0,0.0);		//set the cammera's position
+#endif
 	success = hydro->display();
-
+#ifndef SCHOOL
 	if(success)
 		glutSwapBuffers();			//swap the buffer
+#endif
+
 }
 
 
@@ -271,7 +284,7 @@ void ogl::mousePassiveMove(int x, int y)	//just moving the mouse activates this 
 int ogl::Start(int argc, char** argv)	//initialize glut and set all of the call backs
 {
 	//Set up the glut window
-
+#ifndef SCHOOL
 	glutInit(&argc,argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH );
 	glutInitWindowSize(640,480);
@@ -294,7 +307,15 @@ int ogl::Start(int argc, char** argv)	//initialize glut and set all of the call 
 	initWorld();
 	//Lets get started!
 	glutMainLoop();
+#endif
+
+#ifdef SCHOOL
+	cout << "School Mode Active, OpenGL Display functionality will not be used" << endl;
+	initWorld();
+#endif
 	
+
+
 
 }
  

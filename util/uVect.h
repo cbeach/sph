@@ -62,9 +62,9 @@ class uVect
 
 		//getters
 		virtual vector <double>& getVect();		//returns a vector according to what coordinate system you're using
-		virtual vector <double> getCartesian();
-		virtual vector <double> getCylindrical();
-		virtual vector <double> getSpherical();
+		virtual vector <double>* getCartesian();
+		virtual vector <double>* getCylindrical();
+		virtual vector <double>* getSpherical();
 				
 		
 		virtual void addVect(uVect*);	//add another vector to this one.  If vectors don't use the same coordinate system the resultant will have the same system as "this".

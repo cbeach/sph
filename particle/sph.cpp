@@ -22,18 +22,21 @@ sph is responsible for orginization of a group of smooth particles.
 
 #include <particle/sph.h>
 #include <util/uVect.h>
+#include <instrumentation.h>
+
 
 sph::sph()
 {
 	dls = new vector <GLuint> (3);
+	createDL(1,10);	
 	frameTimer = new timer;
 	timeLastFrame = frameTimer->elapsed();
-	createDL(1,10);	
 }
 
 sph::sph(int particles)
 {
 	particleCount = particles;
+
 	dls = new vector <GLuint> (3);
 	frameTimer = new timer;
 	createDL(0,10);
@@ -60,6 +63,7 @@ sph::~sph()
 	delete material;
 //	delete metaMesh;
 	delete dls;
+	delete frameTimer;
 
 }
 
@@ -82,15 +86,20 @@ void sph::applyForces(double timeDiff)
 							positionVector->at(1),
 							positionVector->at(2));
 				if(tempUVect)
+				{
 					vel2 = material->at(i)->applyForce(*tempUVect, timeDiff);
+					delete vel2;
+				}
+				
 				delete positionVector;
 				delete tempUVect;
+				/*
 				if(i == 1)
 				{
 					tempUVect = material->at(i)->getVelocity();
 					 vel = tempUVect->getCartesian();
 					 
-
+				
 					cout << "i " << vel.at(0) << " " << 
 						"j " << vel.at(1) << " " <<
 						"k " << vel.at(2) << " " <<
@@ -99,9 +108,11 @@ void sph::applyForces(double timeDiff)
 					cout << "vel[0] " << vel2->at(0) << " " <<
 						"vel[1] " << vel2->at(1) << " " <<
 						"vel[2] " << vel2->at(2) << endl << endl;
+					
 					delete positionVector;
 					delete tempUVect;
 				}
+				*/
 
 			}
 		}
@@ -113,19 +124,20 @@ void sph::applyForces(double timeDiff)
 		material->at(i)->updatePosition(timeDiff);
 
 	}
+	
 }
 
 
 int sph::display()
 {
 	int index = 0;
-	int success;
+	int success = 0;
 	bool cont = true;
 	
 	double currentTime = frameTimer->elapsed();
 	
 	success = 0;
-
+	
 	if((currentTime - timeLastFrame) > 0)
 	{
 		applyForces(currentTime - timeLastFrame);
@@ -141,7 +153,10 @@ int sph::display()
 				{
 					if(material->at(index))
 					{
+						
+						#ifndef SCHOOL 
 						material->at(index)->display(timeLastFrame);
+						#endif
 					}
 					index++;
 				}
@@ -169,12 +184,14 @@ int sph::display()
 			success = 1;
 		}
 	}
+
 	return success;
+
 }
 
 void sph::createDL(int index, int space)
 {
-	
+#ifndef SCHOOL	
 	int VertexCount = (90/space)*(360/space)*4;
 	VERTICES *VERTEX = createSphere(2,0.0,0.0,0.0,10);
 	dls->at(index) = glGenLists(1);
@@ -183,7 +200,7 @@ void sph::createDL(int index, int space)
 	glEndList();
 
 	delete[] VERTEX;
-
+#endif
 }
 
 void sph::DisplaySphere (double R, int VertexCount, VERTICES *VERTEX)

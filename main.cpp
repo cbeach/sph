@@ -13,11 +13,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	uVect *vect = new uVect(1,0,0,SPHERICAL);
 	ogl sph;
 
 	sph.Start(argc, argv);
-	
 
 	return 0;
 }

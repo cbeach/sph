@@ -208,34 +208,34 @@ vector <double>& uVect::getVect()	//self explanitory
 	return *tempV;
 }
 
-vector <double> uVect::getCartesian()	//self explanitory
+vector <double>* uVect::getCartesian()	//self explanitory
 {
 	vector <double> *tempV = new vector <double> (4);
 
 	for(int i = 0; i < 4; i++)
 		tempV->at(i) = cartesian[i];
 
-	return *tempV;
+	return tempV;
 }
 
-vector <double> uVect::getCylindrical()	//self explanitory
+vector <double>* uVect::getCylindrical()	//self explanitory
 {
 	vector <double> *tempV = new vector <double> (4);
 
 	for(int i = 0; i < 3; i++)
 		tempV->at(i) = cylindrical[i];
 
-	return *tempV;
+	return tempV;
 }
 
-vector <double> uVect::getSpherical()	//self explanitory
+vector <double>* uVect::getSpherical()	//self explanitory
 {
 	vector <double> *tempV = new vector <double> (4);
 
 	for(int i = 0; i < 3; i++)
 		tempV->at(i) = spherical[i];
 
-	return *tempV;
+	return tempV;
 }
 
 
