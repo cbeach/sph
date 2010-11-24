@@ -112,7 +112,25 @@ class SmoothedParticle
 		virtual uVect* getForceAtPoint(double,double,double);
 		virtual vector <double>* applyForce(uVect &, double);
 		virtual void updatePosition(double elapsedTime);
-				
+		bool operator < (const SmoothedParticle&);
+		bool operator > (const SmoothedParticle&);
+		inline bool compareX(SmoothedParticle& ,SmoothedParticle&);
+		
 };
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

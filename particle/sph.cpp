@@ -16,6 +16,7 @@ sph is responsible for orginization of a group of smooth particles.
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <ctime>
 
 #include <timer.hpp>
@@ -46,9 +47,9 @@ sph::sph(int particles)
 	material = new vector<SmoothedParticle*>(particles);
 	for(int i = 0; i < particles; i++)
 	{
-		randX = ((double)rand()/(double)RAND_MAX) * 15.0;
-		randY = ((double)rand()/(double)RAND_MAX) * 15.0;
-		randZ = ((double)rand()/(double)RAND_MAX) * 15.0;
+		randX = ((double)rand()/(double)RAND_MAX) * 5.0;
+		randY = ((double)rand()/(double)RAND_MAX) * 5.0;
+		randZ = ((double)rand()/(double)RAND_MAX) * 5.0;
 
 		material->at(i) = new SmoothedParticle();
 		material->at(i)->setDL(dls->at(0));
@@ -73,6 +74,15 @@ void sph::applyForces(double timeDiff)
 	vector <double> *positionVector;
 	vector <double> vel;
 	vector <double> *vel2;
+	
+	sort (material->begin(), material->end());
+
+	for(int i = 0; i < particleCount; i++)
+	{
+		positionVector = material->at(i)->getPosition();
+		cout << positionVector->at(0) << endl;
+		delete positionVector;
+	}
 
 	for(int i = 0; i < particleCount; i++)
 	{
@@ -90,7 +100,7 @@ void sph::applyForces(double timeDiff)
 					vel2 = material->at(i)->applyForce(*tempUVect, timeDiff);
 					delete vel2;
 				}
-				
+
 				delete positionVector;
 				delete tempUVect;
 				/*
@@ -117,6 +127,8 @@ void sph::applyForces(double timeDiff)
 			}
 		}
 	}
+
+	cout << endl << endl;
 	for (int i = 0; i < particleCount; i++)
 	{
 		
