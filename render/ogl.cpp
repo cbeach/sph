@@ -22,7 +22,10 @@ ogl is used as a OpenGL controller.  ogl is responsible for managing all openGL 
 
 #define GLUT_SCROLL_UP 		3	//Used in the mouseButtonEvent callback.  freeglut has functionality for mouse scolling, but aparently not the defines.
 #define GLUT_SCROLL_DOWN	4	//so I added them to make my code more readable.
+<<<<<<< HEAD
 #define DISPLAY_LOOPS 1000
+=======
+>>>>>>> d84dd994ca5e12816ab94c1590c5f5fe52451ca8
 #define PARTICLE_COUNT 100
 
 

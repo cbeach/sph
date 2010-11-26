@@ -163,22 +163,20 @@ uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
 	
 	distance = abs( diffX*diffX + diffY*diffY + diffZ*diffZ);
 
-	if (distance > threshold*threshold && distance < 16)
+	if (distance > threshold*threshold && distance < 6)
 	{
-		force = stretchA*(-1.0/((distance - offsetA)*(distance - offsetA))) *
+		force = stretchA*(1.0/((distance - offsetA)*(distance - offsetA))) *
 			forceConstant;
 	}
 	else if (distance < threshold*threshold)
 	{
-		force = stretchA*(1.0/((distance - offsetA)*(distance - offsetA))) *
+		force = stretchA*(-1.0/((distance - offsetA)*(distance - offsetA))) *
 			forceConstant;
 	}
 	else if (distance == threshold)
 	{
 		//do nothing, no attraction or repulsion.  force = 0;
 	}
-	
-	
 	
 	if(distance != 0)
 	{
@@ -234,21 +232,21 @@ void SmoothedParticle::updatePosition(double elapsedTime)
 	delete vel;
 }
 
+bool SmoothedParticle::operator< (const SmoothedParticle &right)
+{
+	return position->at(0) < right.position->at(0);
+}
+
+bool SmoothedParticle::operator> (const SmoothedParticle &right)
+{
+	return position->at(0) > right.position->at(0);
+}
+
+bool compareX(SmoothedParticle &left, SmoothedParticle &right)
+{
+	return left.getPosition()->at(0) < right.getPosition()->at(0);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 

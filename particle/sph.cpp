@@ -54,9 +54,9 @@ sph::sph(int particles)
 	material = new vector<SmoothedParticle*>(particles);
 	for(int i = 0; i < particles; i++)
 	{
-		randX = ((double)rand()/(double)RAND_MAX) * 15.0;
-		randY = ((double)rand()/(double)RAND_MAX) * 15.0;
-		randZ = ((double)rand()/(double)RAND_MAX) * 15.0;
+		randX = ((double)rand()/(double)RAND_MAX) * 5.0;
+		randY = ((double)rand()/(double)RAND_MAX) * 5.0;
+		randZ = ((double)rand()/(double)RAND_MAX) * 5.0;
 
 		material->at(i) = new SmoothedParticle();
 		material->at(i)->setDL(dls->at(0));
@@ -87,7 +87,18 @@ void sph::applyForces(double timeDiff)
 	vector <double> vel;
 	vector <double> *vel2;
 	
+<<<<<<< HEAD
 	sort(material->begin(), material->end(), compareX);	
+=======
+	sort (material->begin(), material->end());
+
+	for(int i = 0; i < particleCount; i++)
+	{
+		positionVector = material->at(i)->getPosition();
+		cout << positionVector->at(0) << endl;
+		delete positionVector;
+	}
+>>>>>>> d84dd994ca5e12816ab94c1590c5f5fe52451ca8
 
 	for(int i = 0; i < particleCount; i++)
 	{
@@ -134,9 +145,15 @@ void sph::applyForces(double timeDiff)
 					material->at(j)->applyForce(*primaryTempUVect, timeDiff);
 						
 				}
+<<<<<<< HEAD
 				
 				delete primaryTempUVect;
 				delete secondaryTempUVect;
+=======
+
+				delete positionVector;
+				delete tempUVect;
+>>>>>>> d84dd994ca5e12816ab94c1590c5f5fe52451ca8
 				/*
 				if(i == 1)
 				{
@@ -169,9 +186,13 @@ void sph::applyForces(double timeDiff)
 		}
 	}
 
+<<<<<<< HEAD
 	
 	cout << "count: " << count << endl;
 
+=======
+	cout << endl << endl;
+>>>>>>> d84dd994ca5e12816ab94c1590c5f5fe52451ca8
 	for (int i = 0; i < particleCount; i++)
 	{
 		
