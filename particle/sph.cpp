@@ -16,6 +16,7 @@ sph is responsible for orginization of a group of smooth particles.
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <ctime>
 
 #include <timer.hpp>
@@ -23,6 +24,13 @@ sph is responsible for orginization of a group of smooth particles.
 #include <particle/sph.h>
 #include <util/uVect.h>
 #include <instrumentation.h>
+
+bool compareX(SmoothedParticle* left, SmoothedParticle* right)
+{
+	if(left->getPosition()->at(0) < right->getPosition()->at(0))
+		return true;
+	return false;
+}
 
 
 sph::sph()
@@ -69,30 +77,66 @@ sph::~sph()
 
 void sph::applyForces(double timeDiff)
 {
-	uVect *tempUVect;
-	vector <double> *positionVector;
+	double distance = 0;
+	int count = 0;
+
+	uVect *primaryTempUVect;
+	uVect *secondaryTempUVect;
+	vector <double> *primaryPositionVector;
+	vector <double> *secondaryPositionVector;
 	vector <double> vel;
 	vector <double> *vel2;
+	
+	sort(material->begin(), material->end(), compareX);	
 
 	for(int i = 0; i < particleCount; i++)
 	{
-		for(int j = 0; j < particleCount; j++)
+		for(int j = i + 1; j < particleCount; j++)
 		{
-			if(i != j)
+//			if(i != j)
+//			{
+				
+			primaryPositionVector = material->at(i)->getPosition();
+			secondaryPositionVector = material->at(j)->getPosition();
+			
+			if(primaryPositionVector && secondaryPositionVector)
 			{
-				positionVector = material->at(j)->getPosition();
-				tempUVect = material->at(i)->getForceAtPoint(
-							positionVector->at(0),
-							positionVector->at(1),
-							positionVector->at(2));
-				if(tempUVect)
+				distance = ((primaryPositionVector->at(0) - secondaryPositionVector->at(0))*
+					    (primaryPositionVector->at(0) - secondaryPositionVector->at(0))+
+					    (primaryPositionVector->at(1) - secondaryPositionVector->at(1))*
+					    (primaryPositionVector->at(1) - secondaryPositionVector->at(1))+
+					    (primaryPositionVector->at(2) - secondaryPositionVector->at(2))*
+					    (primaryPositionVector->at(2) - secondaryPositionVector->at(2)));
+			}
+				
+			if(distance <= 25)
+			{
+				primaryTempUVect = material->at(i)->getForceAtPoint(
+							secondaryPositionVector->at(0),
+							secondaryPositionVector->at(1),
+							secondaryPositionVector->at(2));
+				secondaryTempUVect = material->at(j)->getForceAtPoint(
+							primaryPositionVector->at(0),
+							primaryPositionVector->at(1),
+							primaryPositionVector->at(2));
+/*
+				if(i == 0)
 				{
-					vel2 = material->at(i)->applyForce(*tempUVect, timeDiff);
-					delete vel2;
+					if(j == 1)
+						cout << 0 << ": " << distance << ", " << material->at(0)->getPosition()->at(0) << endl;
+				
+					cout << j << ": " << distance << ", " << secondaryPositionVector->at(0) << endl;
+				}
+*/
+				if(primaryTempUVect && secondaryTempUVect)
+				{
+					material->at(i)->applyForce(*secondaryTempUVect, timeDiff);
+					material->at(j)->applyForce(*primaryTempUVect, timeDiff);
+						
 				}
 				
-				delete positionVector;
-				delete tempUVect;
+				delete primaryTempUVect;
+				delete secondaryTempUVect;
 				/*
 				if(i == 1)
 				{
@@ -114,9 +158,20 @@ void sph::applyForces(double timeDiff)
 				}
 				*/
 
-			}
+//			}
+				count++;
+			} else 
+				break;
+			
+			delete primaryPositionVector;
+			delete secondaryPositionVector;
+
 		}
 	}
+
+	
+	cout << "count: " << count << endl;
+
 	for (int i = 0; i < particleCount; i++)
 	{
 		
