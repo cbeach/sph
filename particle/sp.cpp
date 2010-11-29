@@ -192,7 +192,7 @@ uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
 	return NULL;
 }
 
-vector <double>* SmoothedParticle::applyForce(uVect &actingForce, double elapsedTime)
+void SmoothedParticle::applyForce(uVect &actingForce, double elapsedTime)
 {
 	vector <double> *force = actingForce.getCartesian();
 	vector <double> *vel = velocity->getCartesian();
@@ -213,8 +213,8 @@ vector <double>* SmoothedParticle::applyForce(uVect &actingForce, double elapsed
 	
 	velocity = new uVect(vel->at(0), vel->at(1), vel->at(2), 1);
 	delete force;
-
-	return vel;
+	delete vel;
+//	return vel;
 }
 
 void SmoothedParticle::updatePosition(double elapsedTime)

@@ -27,8 +27,20 @@ sph is responsible for orginization of a group of smooth particles.
 
 bool compareX(SmoothedParticle* left, SmoothedParticle* right)
 {
-	if(left->getPosition()->at(0) < right->getPosition()->at(0))
+	vector <double> *leftPosition = left->getPosition(); 
+	vector <double> *rightPosition = right->getPosition(); 
+	
+	if( leftPosition->at(0) < rightPosition->at(0))
+	{
+		delete leftPosition;
+		delete rightPosition;
+		
 		return true;
+
+	}
+
+	delete leftPosition;
+	delete rightPosition;
 	return false;
 }
 
@@ -87,18 +99,7 @@ void sph::applyForces(double timeDiff)
 	vector <double> vel;
 	vector <double> *vel2;
 	
-<<<<<<< HEAD
 	sort(material->begin(), material->end(), compareX);	
-=======
-	sort (material->begin(), material->end());
-
-	for(int i = 0; i < particleCount; i++)
-	{
-		positionVector = material->at(i)->getPosition();
-		cout << positionVector->at(0) << endl;
-		delete positionVector;
-	}
->>>>>>> d84dd994ca5e12816ab94c1590c5f5fe52451ca8
 
 	for(int i = 0; i < particleCount; i++)
 	{
@@ -130,7 +131,10 @@ void sph::applyForces(double timeDiff)
 							primaryPositionVector->at(0),
 							primaryPositionVector->at(1),
 							primaryPositionVector->at(2));
+			
+
 /*
+
 				if(i == 0)
 				{
 					if(j == 1)
@@ -145,15 +149,12 @@ void sph::applyForces(double timeDiff)
 					material->at(j)->applyForce(*primaryTempUVect, timeDiff);
 						
 				}
-<<<<<<< HEAD
-				
+	
+				delete primaryPositionVector;
+				delete secondaryPositionVector;
 				delete primaryTempUVect;
 				delete secondaryTempUVect;
-=======
 
-				delete positionVector;
-				delete tempUVect;
->>>>>>> d84dd994ca5e12816ab94c1590c5f5fe52451ca8
 				/*
 				if(i == 1)
 				{
@@ -178,21 +179,16 @@ void sph::applyForces(double timeDiff)
 //			}
 				count++;
 			} else 
+			{
+				delete primaryPositionVector;
+				delete secondaryPositionVector;
+	
 				break;
-			
-			delete primaryPositionVector;
-			delete secondaryPositionVector;
-
+			}
+		
 		}
 	}
 
-<<<<<<< HEAD
-	
-	cout << "count: " << count << endl;
-
-=======
-	cout << endl << endl;
->>>>>>> d84dd994ca5e12816ab94c1590c5f5fe52451ca8
 	for (int i = 0; i < particleCount; i++)
 	{
 		
