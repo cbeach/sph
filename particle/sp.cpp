@@ -154,35 +154,24 @@ GLuint SmoothedParticle::getDL(){return DL;}
 
 uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
 {
-	double diffX = position->at(0) - x;
-	double diffY = position->at(1) - y;
-	double diffZ = position->at(2) - z;	
+	double diffX = x - position->at(0);
+	double diffY = y - position->at(1);
+	double diffZ = z - position->at(2);	
 
 	double distance = 0;
 	double force = 0;
 	
-	distance = abs( diffX*diffX + diffY*diffY + diffZ*diffZ);
+	distance = diffX*diffX + diffY*diffY + diffZ*diffZ;
 
-	if (distance > threshold*threshold && distance < 6)
-	{
-		force = stretchA*(1.0/((distance - offsetA)*(distance - offsetA))) *
-			forceConstant;
-	}
-	else if (distance < threshold*threshold)
-	{
-		force = stretchA*(-1.0/((distance - offsetA)*(distance - offsetA))) *
-			forceConstant;
-	}
-	else if (distance == threshold)
-	{
-		//do nothing, no attraction or repulsion.  force = 0;
-	}
+	force = stretchA*(1.0/((distance - offsetA)*(distance - offsetA))) *
+		forceConstant;
+	cout << "force: " << force << endl;
 	
 	if(distance != 0)
 	{
-		double xComponent = diffX/distance;
-		double yComponent = diffY/distance;
-		double zComponent = diffZ/distance;
+		double xComponent = diffX/force;
+		double yComponent = diffY/force;
+		double zComponent = diffZ/force;
 	
 		uVect *tempUVect = new uVect(xComponent, yComponent, zComponent, 1);
 		tempUVect->setScalar(force);
@@ -242,11 +231,26 @@ bool SmoothedParticle::operator> (const SmoothedParticle &right)
 	return position->at(0) > right.position->at(0);
 }
 
-bool compareX(SmoothedParticle &left, SmoothedParticle &right)
+double SmoothedParticle::smoothingKernel(double r, double h)
 {
-	return left.getPosition()->at(0) < right.getPosition()->at(0);
+	double v = r/h;
+	
 
+	if(v > 2)
+	{
+		return 0;
+	}
+	else if(1 <= v && v <= 2)
+	{
+		return (3.0/(4.0*PI*h*h*h))*(10.0/3.0 - 7*v*v + 4*v*v*v);
+	}
 
+	else if(0 <= v && v < 1)
+	{	
+		return (3.0/(4.0*PI*h*h*h))*((2.0-v)*(2.0-v)*((5.0-4.0*v)/3.0));
+	}
+	
+	else 
+		return -1; //wtf just happened?
 
 }
-

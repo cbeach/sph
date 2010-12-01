@@ -114,13 +114,11 @@ class SmoothedParticle
 		virtual void updatePosition(double elapsedTime);
 		bool operator < (const SmoothedParticle&);
 		bool operator > (const SmoothedParticle&);
-		inline bool compareX(SmoothedParticle& ,SmoothedParticle&);
+		virtual double smoothingKernel(double, double);
 		
 };
 
 #endif
-
-
 
 
 

@@ -155,26 +155,14 @@ void sph::applyForces(double timeDiff)
 				delete primaryTempUVect;
 				delete secondaryTempUVect;
 
-				/*
-				if(i == 1)
-				{
-					tempUVect = material->at(i)->getVelocity();
-					 vel = tempUVect->getCartesian();
-					 
 				
-					cout << "i " << vel.at(0) << " " << 
-						"j " << vel.at(1) << " " <<
-						"k " << vel.at(2) << " " <<
-						"l " << vel.at(3) << endl;
+				cout << "i " << primaryPositionVector->at(0) << " " << 
+					"j " << primaryPositionVector->at(1) << " " <<
+					"k " << primaryPositionVector->at(2) << " " <<
+					"l " << primaryPositionVector->at(3) << endl;
 
-					cout << "vel[0] " << vel2->at(0) << " " <<
-						"vel[1] " << vel2->at(1) << " " <<
-						"vel[2] " << vel2->at(2) << endl << endl;
-					
-					delete positionVector;
-					delete tempUVect;
-				}
-				*/
+				
+			
 
 //			}
 				count++;
