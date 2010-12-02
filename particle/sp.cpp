@@ -165,7 +165,7 @@ uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
 
 	force = stretchA*(1.0/((distance - offsetA)*(distance - offsetA))) *
 		forceConstant;
-	cout << "force: " << force << endl;
+//	cout << "force: " << force << endl;
 	
 	if(distance != 0)
 	{

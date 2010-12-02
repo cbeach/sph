@@ -154,13 +154,13 @@ void sph::applyForces(double timeDiff)
 				delete secondaryPositionVector;
 				delete primaryTempUVect;
 				delete secondaryTempUVect;
-
+/*
 				
 				cout << "i " << primaryPositionVector->at(0) << " " << 
 					"j " << primaryPositionVector->at(1) << " " <<
 					"k " << primaryPositionVector->at(2) << " " <<
 					"l " << primaryPositionVector->at(3) << endl;
-
+*/
 				
 			
 
