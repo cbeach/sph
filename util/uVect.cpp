@@ -171,7 +171,7 @@ void uVect::setScalar(double newMag)
 
 vector <double>& uVect::getVect()	//self explanitory
 {
-	vector <double> *tempV;
+	vector <double> *tempV = NULL;
 	switch(coordSys)
 	{
 		case 0:

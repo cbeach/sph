@@ -51,10 +51,12 @@ class sph
 		virtual void DisplaySphere(double R, int VertexCount, VERTICES*);
 		virtual VERTICES* createSphere(double radius, double x, double y, double z, int space);	
 		virtual void applyForces(double timeDiff);
-
+		virtual void smooth();
+		
 	public:
 		sph();
 		sph(int);
+		sph(int,int);
 		sph(const sph&);
 		~sph();
 //		VERTECIES *VERTEX			

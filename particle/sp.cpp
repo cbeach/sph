@@ -11,6 +11,7 @@ particle at a certain point.
 
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <cmath>
 
 #include <GL/gl.h>
@@ -21,25 +22,27 @@ particle at a certain point.
 #include <util/uVect.h>
 
 #define CONST_FORCE_CONST 1
+#define WEIGHTLESS
 
+using namespace std;
 
 SmoothedParticle::SmoothedParticle():radius(1),mass(1),materialID(WATER),
-threshold(0.5),stretchR(1),stretchA(1),offsetR(0),offsetA(0),maxR(100),
-maxA(-100),forceConstant(CONST_FORCE_CONST)
+forceConstant(CONST_FORCE_CONST),threshold(0.5),stretchR(1),stretchA(1),
+offsetR(0),offsetA(0),maxR(100),maxA(-100)
 {
 	position = new vector <double> (3);
-	neighbors = new vector<SmoothedParticle*> (10);
+	neighbors = new stack<int>;
 	velocity  = new uVect(0,0,0,1);
 	color = new vector<int> (3);
 }
 
 
 SmoothedParticle::SmoothedParticle(const SmoothedParticle& clone):radius(1),mass(1),
-materialID(WATER),threshold(0.5),stretchR(1),stretchA(1),offsetR(0),offsetA(0),
-maxR(100),maxA(-100),forceConstant(CONST_FORCE_CONST)
+materialID(WATER),forceConstant(CONST_FORCE_CONST),threshold(0.5),
+stretchR(1),stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100)
 {
 	position = new vector<double> (*clone.position);
-	neighbors = new vector<SmoothedParticle*> (*clone.neighbors);
+	neighbors = new stack<int> ;
 	velocity = new uVect(*clone.velocity);
 	radius = clone.radius;
 	mass = clone.mass;
@@ -67,7 +70,7 @@ void SmoothedParticle::display(double oldFrameTime)
 
 #ifndef SCHOOL
 	glPushMatrix();
-	glColor4f(1.0,1.0,1.0,0.0);
+//	glColor4f(1.0,1.0,1.0,0.0);
 	glTranslated(position->at(0), position->at(1), position->at(2));
 
 	if(DL != 0)
@@ -152,29 +155,29 @@ double SmoothedParticle::getMaterialID(){return materialID;}
 float SmoothedParticle::getPressurescale(){return pressureScale;}
 GLuint SmoothedParticle::getDL(){return DL;}
 
-uVect* SmoothedParticle::getForceAtPoint(double x, double y, double z)
+uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 {
-	double diffX = x - position->at(0);
-	double diffY = y - position->at(1);
-	double diffZ = z - position->at(2);	
-
+	double diffX = neighbor->position->at(0) - position->at(0);
+	double diffY = neighbor->position->at(1) - position->at(1);
+	double diffZ = neighbor->position->at(2) - position->at(2);	
+	
+	
 	double distance = 0;
 	double force = 0;
-	
-	distance = diffX*diffX + diffY*diffY + diffZ*diffZ;
+	double nMass = neighbor->mass;
+	double nRadius = neighbor->radius;
 
-	force = stretchA*(1.0/((distance - offsetA)*(distance - offsetA))) *
-		forceConstant;
-//	cout << "force: " << force << endl;
-	
+	distance = (diffX*diffX + diffY*diffY + diffZ*diffZ);
+	force = -(((distance-2)*(distance - 2)*(distance - 2)) - (distance - 2)*4);
+//	force =  stretchA*(-1.0/((distance - offsetA)*(distance - offsetA))) * forceConstant * .001;
+
 	if(distance != 0)
 	{
-		double xComponent = diffX/force;
-		double yComponent = diffY/force;
-		double zComponent = diffZ/force;
+		double xComponent = ((1.0) * diffX / distance) * force;
+		double yComponent = ((1.0) * diffY / distance) * force;
+		double zComponent = ((1.0) * diffZ / distance) * force;
 	
 		uVect *tempUVect = new uVect(xComponent, yComponent, zComponent, 1);
-		tempUVect->setScalar(force);
 
 		return tempUVect;
 	}
@@ -186,11 +189,12 @@ void SmoothedParticle::applyForce(uVect &actingForce, double elapsedTime)
 	vector <double> *force = actingForce.getCartesian();
 	vector <double> *vel = velocity->getCartesian();
 
-	double acceleration = force->at(3) / mass;
+//	double acceleration = force->at(3) / mass;
 
-	vel->at(0) += acceleration * force->at(0);
-	vel->at(1) += acceleration * force->at(1);
-	vel->at(2) += acceleration * force->at(2);
+	vel->at(0) += (force->at(0) / mass) * elapsedTime;
+	vel->at(1) += (force->at(1) / mass) * elapsedTime;
+	vel->at(2) += (force->at(2) / mass) * elapsedTime;
+
 /*	cout << "force: " << force.at(0) << "\t " << 
 		force.at(1) << "\t " <<
 		force.at(2) << "\t " <<
@@ -209,6 +213,12 @@ void SmoothedParticle::applyForce(uVect &actingForce, double elapsedTime)
 void SmoothedParticle::updatePosition(double elapsedTime)
 {
 	vector <double> *vel = velocity->getCartesian();
+#ifndef WEIGHTLESS
+	vel->at(2) += -9.8 * elapsedTime;
+#endif
+	if(velocity)
+		delete velocity;
+	velocity = new uVect(vel->at(0), vel->at(1), vel->at(2), uVect::cart);
 /*
 	cout << "position: " << position->at(0) << "\t\t " <<
 		 position->at(1) << "\t\t " <<
@@ -231,26 +241,107 @@ bool SmoothedParticle::operator> (const SmoothedParticle &right)
 	return position->at(0) > right.position->at(0);
 }
 
-double SmoothedParticle::smoothingKernel(double r, double h)
+vector <double>* SmoothedParticle::smoothingKernel(vector <double> *r)
 {
-	double v = r/h;
+	vector <double> *tempVect = new vector <double> (3);
 	
+	double re = 2; //this is the effective radius
+	double mag = 	sqrt(r->at(0)*r->at(0)+
+			r->at(1)*r->at(1)+
+			r->at(2)*r->at(2));
 
-	if(v > 2)
-	{
-		return 0;
-	}
-	else if(1 <= v && v <= 2)
-	{
-		return (3.0/(4.0*PI*h*h*h))*(10.0/3.0 - 7*v*v + 4*v*v*v);
-	}
+	tempVect->at(0) = 	(45.0/(PI*re*re*re*re*re*re)) *
+	 			((re*mag)*(re*mag)*(re*mag)) *
+				(r->at(0)/mag);
+				
+	tempVect->at(1) = 	(45.0/(PI*re*re*re*re*re*re)) *
+	 			((re*mag)*(re*mag)*(re*mag)) *
+				(r->at(1)/mag);
 
-	else if(0 <= v && v < 1)
-	{	
-		return (3.0/(4.0*PI*h*h*h))*((2.0-v)*(2.0-v)*((5.0-4.0*v)/3.0));
+	tempVect->at(2) = 	(45.0/(PI*re*re*re*re*re*re)) *
+	 			((re*mag)*(re*mag)*(re*mag)) *
+				(r->at(2)/mag);
+
+
+	return tempVect;
+}
+/*
+void SmoothedParticle::pushNeighbor(int n)
+{
+	neighbors->push(n);
+}
+
+int SmoothedParticle::popNeighbor()
+{
+	int n = 0;
+	if(!neighbors->empty())
+	{
+		n = neighbors->top();
+		neighbors->pop();
 	}
-	
-	else 
-		return -1; //wtf just happened?
+	return n;
+}
+
+int SmoothedParticle::sizeNeighbor()
+{
+	return neighbors->size();
 
 }
+*/
+void SmoothedParticle::smoothVelocity(SmoothedParticle *neighborParticle)
+{
+	vector <double> *vel = velocity->getCartesian();
+	vector <double> *vel2 = neighborParticle->velocity->getCartesian();
+	vector <double> *nPos = neighborParticle->position;
+	vector <double> diff(3);
+
+	double nMass = neighborParticle->mass;
+	double nRadius = neighborParticle->mass;
+
+	diff.at(0) = nPos->at(0) - position->at(0);
+	diff.at(1) = nPos->at(1) - position->at(1);
+	diff.at(2) = nPos->at(2) - position->at(2);
+	
+	vector <double> *smoothed = smoothingKernel(&diff);
+
+	vel->at(0) +=	nMass * (vel2->at(0)/(nMass/(nRadius*nRadius*PI))) * smoothed->at(0);
+	vel->at(1) +=	nMass * (vel2->at(1)/(nMass/(nRadius*nRadius*PI))) * smoothed->at(1);
+	vel->at(2) +=	nMass * (vel2->at(2)/(nMass/(nRadius*nRadius*PI))) * smoothed->at(2);
+
+	
+	if(velocity)
+		delete velocity;
+	velocity = new uVect(vel->at(0),vel->at(1),vel->at(2), uVect::cart);
+
+	delete vel;
+	delete vel2;
+	delete smoothed;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

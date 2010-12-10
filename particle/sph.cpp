@@ -16,6 +16,7 @@ sph is responsible for orginization of a group of smooth particles.
 
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <algorithm>
 #include <ctime>
 
@@ -25,12 +26,14 @@ sph is responsible for orginization of a group of smooth particles.
 #include <util/uVect.h>
 #include <instrumentation.h>
 
+const int DIMENSION = 20;
+
 bool compareX(SmoothedParticle* left, SmoothedParticle* right)
 {
 	vector <double> *leftPosition = left->getPosition(); 
 	vector <double> *rightPosition = right->getPosition(); 
 	
-	if( leftPosition->at(0) < rightPosition->at(0))
+	if( leftPosition->at(2) < rightPosition->at(2))
 	{
 		delete leftPosition;
 		delete rightPosition;
@@ -56,7 +59,7 @@ sph::sph()
 sph::sph(int particles)
 {
 	particleCount = particles;
-
+//	particleCount = 5;	
 	dls = new vector <GLuint> (3);
 	frameTimer = new timer;
 	createDL(0,10);
@@ -64,6 +67,18 @@ sph::sph(int particles)
 	srand(time(0));
 	
 	material = new vector<SmoothedParticle*>(particles);
+/*
+	for(int i = 0; i < 5; i++)
+	{
+		material->at(i) = new SmoothedParticle();
+		material->at(i)->setDL(dls->at(0));
+		material->at(i)->setPosition(0, i/2.0, 0);
+		material->at(i)->setMass(5);
+
+
+	}
+*/
+
 	for(int i = 0; i < particles; i++)
 	{
 		randX = ((double)rand()/(double)RAND_MAX) * 5.0;
@@ -75,9 +90,60 @@ sph::sph(int particles)
 		material->at(i)->setPosition(randX, randY, randZ);
 		material->at(i)->setMass(5);
 	}
+
 	timeLastFrame = frameTimer->elapsed();
 }
 
+sph::sph(int particles, int cube)
+{
+//	particleCount = particles;
+	particleCount = DIMENSION*DIMENSION*DIMENSION;
+	dls = new vector <GLuint> (3);
+	frameTimer = new timer;
+	createDL(0,10);
+	srand(time(0));
+	
+//	material = new vector<SmoothedParticle*>(particles);
+	material = new vector<SmoothedParticle*>(DIMENSION*DIMENSION*DIMENSION);
+
+	for(int i = 0; i < DIMENSION; i++)
+	{
+		for(int j = 0; j < DIMENSION; j++)
+		{
+			for(int k = 0; k <  DIMENSION; k++)
+			{//	cout << DIMENSION*DIMENSION*i +DIMENSION*j +k << endl;
+
+				material->at(DIMENSION*DIMENSION*i + DIMENSION*j + k) = new SmoothedParticle();
+				material->at(DIMENSION*DIMENSION*i + DIMENSION*j + k)->setDL(dls->at(0));
+				material->at(DIMENSION*DIMENSION*i + DIMENSION*j + k)->setPosition(i/(DIMENSION/15.0), j/(DIMENSION/15.0), k/(DIMENSION/15.0));
+				material->at(DIMENSION*DIMENSION*i + DIMENSION*j + k)->setMass(5);
+			}
+		}
+	}
+	for(int i = 0; i < DIMENSION*DIMENSION*DIMENSION; i++)
+	{
+		if(material->at(i) == 0)
+			cout << i << endl;
+
+
+	}
+
+/*
+
+	for(int i = 0; i < particles; i++)
+	{
+		randX = ((double)rand()/(double)RAND_MAX) * 5.0;
+		randY = ((double)rand()/(double)RAND_MAX) * 5.0;
+		randZ = ((double)rand()/(double)RAND_MAX) * 5.0;
+
+		material->at(i) = new SmoothedParticle();
+		material->at(i)->setDL(dls->at(0));
+		material->at(i)->setPosition(randX, randY, randZ);
+		material->at(i)->setMass(5);
+	}
+*/
+	timeLastFrame = frameTimer->elapsed();
+}
 sph::~sph()
 {
 	delete material;
@@ -90,16 +156,20 @@ sph::~sph()
 void sph::applyForces(double timeDiff)
 {
 	double distance = 0;
-	int count = 0;
+
+//	int count = 0;
+//	int interactions = 0;
 
 	uVect *primaryTempUVect;
 	uVect *secondaryTempUVect;
 	vector <double> *primaryPositionVector;
 	vector <double> *secondaryPositionVector;
 	vector <double> vel;
-	vector <double> *vel2;
-	
+
 	sort(material->begin(), material->end(), compareX);	
+
+//	vector::itterator topZ = material->end();
+
 
 	for(int i = 0; i < particleCount; i++)
 	{
@@ -121,18 +191,13 @@ void sph::applyForces(double timeDiff)
 					    (primaryPositionVector->at(2) - secondaryPositionVector->at(2)));
 			}
 				
-			if(distance <= 25)
+			if(distance <= 2)
 			{
-				primaryTempUVect = material->at(i)->getForceAtPoint(
-							secondaryPositionVector->at(0),
-							secondaryPositionVector->at(1),
-							secondaryPositionVector->at(2));
-				secondaryTempUVect = material->at(j)->getForceAtPoint(
-							primaryPositionVector->at(0),
-							primaryPositionVector->at(1),
-							primaryPositionVector->at(2));
+				primaryTempUVect = material->at(i)->getForceAtPoint(material->at(j));
+				secondaryTempUVect = material->at(j)->getForceAtPoint(material->at(i));
 			
-
+				material->at(i)->pushNeighbor(j);
+				material->at(j)->pushNeighbor(i);
 /*
 
 				if(i == 0)
@@ -165,7 +230,6 @@ void sph::applyForces(double timeDiff)
 			
 
 //			}
-				count++;
 			} else 
 			{
 				delete primaryPositionVector;
@@ -175,6 +239,7 @@ void sph::applyForces(double timeDiff)
 			}
 		
 		}
+
 	}
 
 	for (int i = 0; i < particleCount; i++)
@@ -202,6 +267,8 @@ int sph::display()
 	{
 		applyForces(currentTime - timeLastFrame);
 	}
+	
+//	smooth();
 
 	if ((currentTime - timeLastFrame) > 0)
 	{
@@ -209,12 +276,34 @@ int sph::display()
 		{
 			try
 			{
-				if(index < material->capacity())
+				if((unsigned int)index < material->capacity())
 				{
 					if(material->at(index))
 					{
 						
 						#ifndef SCHOOL 
+						switch(index)
+						{
+							case 0:
+								glColor3f(1.0,0.0,0.0);
+								break;
+							case 1:
+								glColor3f(0.0,1.0,0.0);
+								break;
+							case 2:
+								glColor3f(0.0,0.0,1.0);
+								break;
+							case 3:
+								glColor3f(1.0,1.0,1.0);
+								break;
+							case 4:
+								glColor3f(1.0,1.0,0.0);
+								break;
+							default:	
+								break;
+
+
+						};
 						material->at(index)->display(timeLastFrame);
 						#endif
 					}
@@ -252,11 +341,16 @@ int sph::display()
 void sph::createDL(int index, int space)
 {
 #ifndef SCHOOL	
-	int VertexCount = (90/space)*(360/space)*4;
+//	int VertexCount = (90/space)*(360/space)*4;
 	VERTICES *VERTEX = createSphere(2,0.0,0.0,0.0,10);
 	dls->at(index) = glGenLists(1);
 	glNewList(dls->at(index),GL_COMPILE);
-		DisplaySphere(10.0,VertexCount,VERTEX);	
+		glBegin(GL_POINTS);
+			glVertex2i(0, 0);
+		glEnd();
+
+
+//		DisplaySphere(10.0,VertexCount,VERTEX);	
 	glEndList();
 
 	delete[] VERTEX;
@@ -379,4 +473,36 @@ void sph::setTimer(timer *newTimer)
 	frameTimer = newTimer;
 
 }
+
+void sph::smooth()
+{
+	int neighborAddress = 0;
+
+	for(int i = 0; i < particleCount; i++)
+	{
+		for(int j = 0; j < material->at(i)->sizeNeighbor(); j++)
+		{
+			neighborAddress = material->at(i)->popNeighbor();
+			material->at(i)->smoothVelocity(material->at(neighborAddress));
+
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

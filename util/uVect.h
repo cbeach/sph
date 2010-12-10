@@ -54,7 +54,7 @@ class uVect
 		
 		~uVect();
 
-
+		enum {sphere, cart, cylind};
 		//setter
 		virtual void setVect(double a, double b, double c, int mode);		
 		virtual void setScalar(double);								

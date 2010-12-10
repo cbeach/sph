@@ -13,6 +13,7 @@ particle at a certain point.
 
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <timer.hpp>
 
 #include <GL/gl.h>
@@ -45,8 +46,9 @@ class SmoothedParticle
 	
 		//variables that are needed for basic functioning
 		//physical properties
-		vector <double> *position;
-		vector <SmoothedParticle*>	*neighbors;
+		vector  <double> 	*position;
+		stack	 <int>		*neighbors;
+
 		uVect 	*velocity;
 		double 	radius;
 		double 	mass;
@@ -109,13 +111,33 @@ class SmoothedParticle
 		virtual GLuint getDL();
 		
 		virtual void display(double);
-		virtual uVect* getForceAtPoint(double,double,double);
+		virtual uVect* getForceAtPoint(SmoothedParticle*);
 		virtual void applyForce(uVect &, double);
 		virtual void updatePosition(double elapsedTime);
 		bool operator < (const SmoothedParticle&);
 		bool operator > (const SmoothedParticle&);
-		virtual double smoothingKernel(double, double);
+		virtual vector <double>* smoothingKernel(vector <double>*);
+		virtual void smoothVelocity(SmoothedParticle *);
 		
+		virtual inline void pushNeighbor(int n)
+		{
+			neighbors->push(n);
+		};
+		virtual inline int popNeighbor()
+		{	
+			int n = 0;
+			if(!neighbors->empty())
+			{
+				n = neighbors->top();
+				neighbors->pop();
+			}
+			return n;
+		};
+		virtual inline int sizeNeighbor()
+		{
+			return neighbors->size();
+		};
+
 };
 
 #endif
