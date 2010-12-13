@@ -125,7 +125,7 @@ void ogl::display(void)		//this is the meat of the program.  ogl::display orchis
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//clear the color and depth buffers
 	glLoadIdentity();						
 	
-	gluLookAt(20.0,2.5,2.5,
+	gluLookAt(20.0,7.5,7.5,
 		   2.5,2.5,2.5,
 		   0.0,0.0,1.0);		//set the cammera's position
 #endif

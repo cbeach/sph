@@ -31,7 +31,7 @@ using namespace std;
 using namespace boost;
 
 
-const double ER = 2;
+const double ER = 3;
 
 
 struct BindingPoint
@@ -97,7 +97,7 @@ class SmoothedParticle
 		
 		//setters
 		virtual void setPosition(double,double,double);
-		virtual void setVelocity(uVect*);
+		virtual void setVelocity(double,double,double);
 		virtual void setRadius(double);
 		virtual void setMass(double);
 		virtual void setMaterialID(double);
@@ -120,18 +120,16 @@ class SmoothedParticle
 		virtual uVect* getForceAtPoint(SmoothedParticle*);
 		virtual void applyForce(uVect &, double);
 		virtual void updatePosition(double elapsedTime);
-		bool operator < (const SmoothedParticle&);
-		bool operator > (const SmoothedParticle&);
 		virtual vector <double>* pressureKernel(vector <double>*);
 		virtual vector <double>* viscosityKernel(vector <double>*);
 		virtual	double densityKernel(vector <double>*);
 		
-		virtual void smoothVelocity(SmoothedParticle *);
 		virtual void calculateDensity(SmoothedParticle*);		
 		
 
 		virtual inline void zeroDensity(){density = 0;};
 		virtual inline void printDensity(){cout << "density = " << density << " " << isnan(density) << endl;};
+
 		virtual void clearNAN()
 		{
 			if(isnan(density))

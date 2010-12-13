@@ -63,6 +63,8 @@ sph::sph(int particles)
 	frameTimer = new timer;
 	createDL(0,10);
 	double randX, randY, randZ;
+	double randI, randJ, randK; //velocity vector values
+
 	srand(time(0));
 	
 	#ifdef VISIBLE_TEST
@@ -87,10 +89,15 @@ sph::sph(int particles)
 		randX = ((double)rand()/(double)RAND_MAX) * 5.0;
 		randY = ((double)rand()/(double)RAND_MAX) * 5.0;
 		randZ = ((double)rand()/(double)RAND_MAX) * 5.0;
+		
+		randI = (((double)rand()/(double)RAND_MAX) * 0.2) - 0.1;
+		randJ = (((double)rand()/(double)RAND_MAX) * 0.2) - 0.1;
+		randK = (((double)rand()/(double)RAND_MAX) * 0.2) - 0.1;
 
 		material->at(i) = new SmoothedParticle();
 		material->at(i)->setDL(dls->at(0));
 		material->at(i)->setPosition(randX, randY, randZ);
+		material->at(i)->setVelocity(randI, randJ, randK);
 		material->at(i)->setMass(5);
 	}
 
@@ -168,6 +175,8 @@ void sph::applyForces(double timeDiff)
 	vector <double> *secondaryPositionVector;
 	vector <double> vel;
 
+	sort(material->begin(), material->end(), compareX);	
+	calculateDensity();
 
 	for(int i = 0; i < particleCount; i++)
 	{
@@ -220,6 +229,7 @@ void sph::applyForces(double timeDiff)
 	for (int i = 0; i < particleCount; i++)
 	{
 		material->at(i)->updatePosition(timeDiff);
+		material->at(i)->zeroDensity();
 	}
 }
 
@@ -272,6 +282,7 @@ void sph::calculateDensity()
 	for(int i = 0; i<particleCount; i++)
 	{
 		material->at(i)->clearNAN();
+//		material->at(i)->printDensity();
 	}
 
 }
@@ -286,11 +297,9 @@ int sph::display()
 	
 	success = 0;
 	
-	sort(material->begin(), material->end(), compareX);	
 	
 	if((currentTime - timeLastFrame) > 0)
 	{
-		calculateDensity();
 		applyForces(currentTime - timeLastFrame);
 	}
 
@@ -500,20 +509,6 @@ void sph::setTimer(timer *newTimer)
 
 }
 
-void sph::smooth()
-{
-	int neighborAddress = 0;
-
-	for(int i = 0; i < particleCount; i++)
-	{
-		for(int j = 0; j < material->at(i)->sizeNeighbor(); j++)
-		{
-			neighborAddress = material->at(i)->popNeighbor();
-			material->at(i)->smoothVelocity(material->at(neighborAddress));
-
-		}
-	}
-}
 
 
 

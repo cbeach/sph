@@ -52,7 +52,6 @@ class sph
 		virtual VERTICES* createSphere(double radius, double x, double y, double z, int space);	
 		virtual void calculateDensity();
 		virtual void applyForces(double timeDiff);
-		virtual void smooth();
 		
 	public:
 		sph();
