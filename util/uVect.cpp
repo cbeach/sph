@@ -332,6 +332,10 @@ void uVect::reflect(uVect *normal)	// reflect the vector off a surface (like lig
 
 void uVect::invert()	//turn the vector by 180 degrees
 {
+	cartesian[0] *= -1.0;
+	cartesian[1] *= -1.0;
+	cartesian[2] *= -1.0;
+
 }
 
 

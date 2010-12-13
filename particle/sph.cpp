@@ -58,26 +58,29 @@ sph::sph()
 
 sph::sph(int particles)
 {
-	particleCount = particles;
-//	particleCount = 5;	
+
 	dls = new vector <GLuint> (3);
 	frameTimer = new timer;
 	createDL(0,10);
 	double randX, randY, randZ;
 	srand(time(0));
 	
-	material = new vector<SmoothedParticle*>(particles);
-/*
+	#ifdef VISIBLE_TEST
+	particleCount = 5;
+	material = new vector<SmoothedParticle*>(particleCount);
 	for(int i = 0; i < 5; i++)
 	{
 		material->at(i) = new SmoothedParticle();
 		material->at(i)->setDL(dls->at(0));
 		material->at(i)->setPosition(0, i/2.0, 0);
 		material->at(i)->setMass(5);
-
-
 	}
-*/
+
+	#endif
+
+	#ifndef VISIBLE_TEST
+	particleCount = particles;
+	material = new vector<SmoothedParticle*>(particles);
 
 	for(int i = 0; i < particles; i++)
 	{
@@ -91,6 +94,8 @@ sph::sph(int particles)
 		material->at(i)->setMass(5);
 	}
 
+
+	#endif
 	timeLastFrame = frameTimer->elapsed();
 }
 
@@ -157,28 +162,20 @@ void sph::applyForces(double timeDiff)
 {
 	double distance = 0;
 
-//	int count = 0;
-//	int interactions = 0;
-
 	uVect *primaryTempUVect;
 	uVect *secondaryTempUVect;
 	vector <double> *primaryPositionVector;
 	vector <double> *secondaryPositionVector;
 	vector <double> vel;
 
-	sort(material->begin(), material->end(), compareX);	
-
-//	vector::itterator topZ = material->end();
-
 
 	for(int i = 0; i < particleCount; i++)
 	{
+		
+		primaryPositionVector = material->at(i)->getPosition();
 		for(int j = i + 1; j < particleCount; j++)
 		{
-//			if(i != j)
-//			{
 				
-			primaryPositionVector = material->at(i)->getPosition();
 			secondaryPositionVector = material->at(j)->getPosition();
 			
 			if(primaryPositionVector && secondaryPositionVector)
@@ -198,16 +195,7 @@ void sph::applyForces(double timeDiff)
 			
 				material->at(i)->pushNeighbor(j);
 				material->at(j)->pushNeighbor(i);
-/*
-
-				if(i == 0)
-				{
-					if(j == 1)
-						cout << 0 << ": " << distance << ", " << material->at(0)->getPosition()->at(0) << endl;
 				
-					cout << j << ": " << distance << ", " << secondaryPositionVector->at(0) << endl;
-				}
-*/
 				if(primaryTempUVect && secondaryTempUVect)
 				{
 					material->at(i)->applyForce(*secondaryTempUVect, timeDiff);
@@ -215,43 +203,78 @@ void sph::applyForces(double timeDiff)
 						
 				}
 	
-				delete primaryPositionVector;
 				delete secondaryPositionVector;
 				delete primaryTempUVect;
 				delete secondaryTempUVect;
-/*
-				
-				cout << "i " << primaryPositionVector->at(0) << " " << 
-					"j " << primaryPositionVector->at(1) << " " <<
-					"k " << primaryPositionVector->at(2) << " " <<
-					"l " << primaryPositionVector->at(3) << endl;
-*/
-				
-			
-
-//			}
 			} else 
 			{
-				delete primaryPositionVector;
 				delete secondaryPositionVector;
 	
 				break;
 			}
-		
 		}
-
+		
+		delete primaryPositionVector;
 	}
 
 	for (int i = 0; i < particleCount; i++)
 	{
-		
-//		cout << "here" << endl;
 		material->at(i)->updatePosition(timeDiff);
-
 	}
-	
 }
 
+void sph::calculateDensity()
+{
+	double distance = 0;
+	
+	uVect *primaryTempUVect;
+	uVect *secondaryTempUVect;
+
+	vector <double> *primaryPositionVector;
+	vector <double> *secondaryPositionVector;
+
+	for(int i = 0; i < particleCount; i++)
+	{
+		primaryPositionVector = material->at(i)->getPosition();
+		for(int j = 0; j < particleCount; j++)
+		{
+			secondaryPositionVector = material->at(j)->getPosition();
+			if(primaryPositionVector && secondaryPositionVector)
+			{
+				distance = ((primaryPositionVector->at(0) - secondaryPositionVector->at(0))*
+					    (primaryPositionVector->at(0) - secondaryPositionVector->at(0))+
+					    (primaryPositionVector->at(1) - secondaryPositionVector->at(1))*
+					    (primaryPositionVector->at(1) - secondaryPositionVector->at(1))+
+					    (primaryPositionVector->at(2) - secondaryPositionVector->at(2))*
+					    (primaryPositionVector->at(2) - secondaryPositionVector->at(2)));
+			}
+				
+			if(distance <= ER*ER)
+			{
+				if(primaryTempUVect && secondaryTempUVect)
+				{
+					material->at(i)->calculateDensity(material->at(j));			
+				}
+	
+				delete secondaryPositionVector;
+				delete primaryTempUVect;
+				delete secondaryTempUVect;
+			} else 
+			{
+				delete secondaryPositionVector;
+	
+				break;
+			}
+				
+		}
+		delete primaryPositionVector;
+	}
+	for(int i = 0; i<particleCount; i++)
+	{
+		material->at(i)->clearNAN();
+	}
+
+}
 
 int sph::display()
 {
@@ -263,12 +286,13 @@ int sph::display()
 	
 	success = 0;
 	
+	sort(material->begin(), material->end(), compareX);	
+	
 	if((currentTime - timeLastFrame) > 0)
 	{
+		calculateDensity();
 		applyForces(currentTime - timeLastFrame);
 	}
-	
-//	smooth();
 
 	if ((currentTime - timeLastFrame) > 0)
 	{
@@ -281,7 +305,8 @@ int sph::display()
 					if(material->at(index))
 					{
 						
-						#ifndef SCHOOL 
+						#ifndef SCHOOL
+						#ifdef VISIBLE_TEST
 						switch(index)
 						{
 							case 0:
@@ -304,6 +329,7 @@ int sph::display()
 
 
 						};
+						#endif
 						material->at(index)->display(timeLastFrame);
 						#endif
 					}

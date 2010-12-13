@@ -30,6 +30,10 @@ particle at a certain point.
 using namespace std;
 using namespace boost;
 
+
+const double ER = 2;
+
+
 struct BindingPoint
 {
 	vector <double> points;
@@ -43,7 +47,7 @@ class SmoothedParticle
 	protected:
 		
 		double constForceConst;
-	
+			
 		//variables that are needed for basic functioning
 		//physical properties
 		vector  <double> 	*position;
@@ -56,6 +60,8 @@ class SmoothedParticle
 		timer	*frameTimer;
 		double 	timeLastFrame;
 		double 	forceConstant;
+		bool	reversed;	//this is such a kludge... :(
+		double 	density;
 
 		double threshold;	//thresHold distance between attractive and repulsive
 		double stretchR;	//stretctes the attractive force curve
@@ -116,9 +122,22 @@ class SmoothedParticle
 		virtual void updatePosition(double elapsedTime);
 		bool operator < (const SmoothedParticle&);
 		bool operator > (const SmoothedParticle&);
-		virtual vector <double>* smoothingKernel(vector <double>*);
-		virtual void smoothVelocity(SmoothedParticle *);
+		virtual vector <double>* pressureKernel(vector <double>*);
+		virtual vector <double>* viscosityKernel(vector <double>*);
+		virtual	double densityKernel(vector <double>*);
 		
+		virtual void smoothVelocity(SmoothedParticle *);
+		virtual void calculateDensity(SmoothedParticle*);		
+		
+
+		virtual inline void zeroDensity(){density = 0;};
+		virtual inline void printDensity(){cout << "density = " << density << " " << isnan(density) << endl;};
+		virtual void clearNAN()
+		{
+			if(isnan(density))
+				density = 0;
+		};
+
 		virtual inline void pushNeighbor(int n)
 		{
 			neighbors->push(n);

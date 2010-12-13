@@ -28,7 +28,7 @@ using namespace std;
 
 SmoothedParticle::SmoothedParticle():radius(1),mass(1),materialID(WATER),
 forceConstant(CONST_FORCE_CONST),threshold(0.5),stretchR(1),stretchA(1),
-offsetR(0),offsetA(0),maxR(100),maxA(-100)
+offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
 {
 	position = new vector <double> (3);
 	neighbors = new stack<int>;
@@ -38,8 +38,8 @@ offsetR(0),offsetA(0),maxR(100),maxA(-100)
 
 
 SmoothedParticle::SmoothedParticle(const SmoothedParticle& clone):radius(1),mass(1),
-materialID(WATER),forceConstant(CONST_FORCE_CONST),threshold(0.5),
-stretchR(1),stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100)
+materialID(WATER),forceConstant(CONST_FORCE_CONST),threshold(0.5),stretchR(1),
+stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
 {
 	position = new vector<double> (*clone.position);
 	neighbors = new stack<int> ;
@@ -161,13 +161,24 @@ uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 	double diffY = neighbor->position->at(1) - position->at(1);
 	double diffZ = neighbor->position->at(2) - position->at(2);	
 	
-	
 	double distance = 0;
+	
 	double force = 0;
+
+	double forceX = 0;
+	double forceY = 0;
+	double forceZ = 0;
+	
 	double nMass = neighbor->mass;
 	double nRadius = neighbor->radius;
 
-	distance = (diffX*diffX + diffY*diffY + diffZ*diffZ);
+	distance = sqrt(diffX*diffX + diffY*diffY + diffZ*diffZ);
+	
+//	forceX = 
+
+
+
+
 	force = -(((distance-2)*(distance - 2)*(distance - 2)) - (distance - 2)*4);
 //	force =  stretchA*(-1.0/((distance - offsetA)*(distance - offsetA))) * forceConstant * .001;
 
@@ -213,9 +224,11 @@ void SmoothedParticle::applyForce(uVect &actingForce, double elapsedTime)
 void SmoothedParticle::updatePosition(double elapsedTime)
 {
 	vector <double> *vel = velocity->getCartesian();
-#ifndef WEIGHTLESS
+	
+	#ifndef WEIGHTLESS
 	vel->at(2) += -9.8 * elapsedTime;
-#endif
+	#endif
+	
 	if(velocity)
 		delete velocity;
 	velocity = new uVect(vel->at(0), vel->at(1), vel->at(2), uVect::cart);
@@ -227,6 +240,26 @@ void SmoothedParticle::updatePosition(double elapsedTime)
 	position->at(0) += vel->at(0) * elapsedTime;	
 	position->at(1) += vel->at(1) * elapsedTime;	
 	position->at(2) += vel->at(2) * elapsedTime;	
+/*	
+	if(position->at(0) > 20 || position->at(0) < 0 || 
+	   position->at(1) > 20 || position->at(1) < 0 || 
+	   position->at(2) > 20 || position->at(2) < 0)
+	{
+		if(!reversed)
+		{
+			velocity->invert();
+			reversed = true;
+		}
+		
+	}else{
+
+		reversed = false;
+
+	}
+*/
+	
+
+
 	
 	delete vel;
 }
@@ -241,30 +274,64 @@ bool SmoothedParticle::operator> (const SmoothedParticle &right)
 	return position->at(0) > right.position->at(0);
 }
 
-vector <double>* SmoothedParticle::smoothingKernel(vector <double> *r)
+vector <double>* SmoothedParticle::pressureKernel(vector <double> *r)
 {
 	vector <double> *tempVect = new vector <double> (3);
 	
-	double re = 2; //this is the effective radius
 	double mag = 	sqrt(r->at(0)*r->at(0)+
 			r->at(1)*r->at(1)+
 			r->at(2)*r->at(2));
 
-	tempVect->at(0) = 	(45.0/(PI*re*re*re*re*re*re)) *
-	 			((re*mag)*(re*mag)*(re*mag)) *
-				(r->at(0)/mag);
+	tempVect->at(0) = (45.0/(PI*ER*
+		ER*ER*ER*
+		ER*ER)) * ((ER*mag)*
+		(ER*mag)*(ER*mag)) * (r->at(0)/mag);
 				
-	tempVect->at(1) = 	(45.0/(PI*re*re*re*re*re*re)) *
-	 			((re*mag)*(re*mag)*(re*mag)) *
-				(r->at(1)/mag);
+	tempVect->at(1) = (45.0/(PI*ER*ER*
+		ER*ER*ER*ER)) *
+	 	((ER*mag)*(ER*mag)*
+		(ER*mag)) * (r->at(1)/mag);
 
-	tempVect->at(2) = 	(45.0/(PI*re*re*re*re*re*re)) *
-	 			((re*mag)*(re*mag)*(re*mag)) *
-				(r->at(2)/mag);
+	tempVect->at(2) = (45.0/(PI*ER*ER*
+		ER*ER*ER*ER)) * 
+		((ER*mag)*(ER*mag)*
+		(ER*mag)) * (r->at(2)/mag);
 
 
 	return tempVect;
 }
+
+vector <double>* SmoothedParticle::viscosityKernel(vector <double> *r)
+{
+	vector <double> *tempVect = new vector <double> (3);
+
+	double mag = 	sqrt(r->at(0)*r->at(0)+
+			r->at(1)*r->at(1)+
+			r->at(2)*r->at(2));
+
+	tempVect->at(0) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
+				
+	tempVect->at(1) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
+
+	tempVect->at(2) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
+
+
+	return tempVect;
+}
+
+double SmoothedParticle::densityKernel(vector <double> *r)
+{
+	double mag = 	sqrt(abs(r->at(0)*r->at(0)+
+			r->at(1)*r->at(1)+
+			r->at(2)*r->at(2)));
+	
+	//315/(64*PI*ER^9) * (ER^2 - mag^2)^3
+	return ((315.0)/(64 * PI * ER*ER*ER*ER*ER*ER*ER*ER*ER))*
+		(ER*ER - mag*mag)*(ER*ER - mag*mag)*(ER*ER - mag*mag); 
+
+}
+
+
 /*
 void SmoothedParticle::pushNeighbor(int n)
 {
@@ -290,6 +357,8 @@ int SmoothedParticle::sizeNeighbor()
 */
 void SmoothedParticle::smoothVelocity(SmoothedParticle *neighborParticle)
 {
+
+/*
 	vector <double> *vel = velocity->getCartesian();
 	vector <double> *vel2 = neighborParticle->velocity->getCartesian();
 	vector <double> *nPos = neighborParticle->position;
@@ -302,7 +371,7 @@ void SmoothedParticle::smoothVelocity(SmoothedParticle *neighborParticle)
 	diff.at(1) = nPos->at(1) - position->at(1);
 	diff.at(2) = nPos->at(2) - position->at(2);
 	
-	vector <double> *smoothed = smoothingKernel(&diff);
+	vector <double> *smoothed = densityKernel(&diff);
 
 	vel->at(0) +=	nMass * (vel2->at(0)/(nMass/(nRadius*nRadius*PI))) * smoothed->at(0);
 	vel->at(1) +=	nMass * (vel2->at(1)/(nMass/(nRadius*nRadius*PI))) * smoothed->at(1);
@@ -316,11 +385,18 @@ void SmoothedParticle::smoothVelocity(SmoothedParticle *neighborParticle)
 	delete vel;
 	delete vel2;
 	delete smoothed;
+*/
 }
 
 
 
-
+void SmoothedParticle::calculateDensity(SmoothedParticle *neighbor)
+{
+	if(neighbor)
+	{
+		density += neighbor->mass * densityKernel(neighbor->position);
+	}
+}
 
 
 

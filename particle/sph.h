@@ -50,6 +50,7 @@ class sph
 		//http://www.swiftless.com/tutorials/opengl/sphere.html
 		virtual void DisplaySphere(double R, int VertexCount, VERTICES*);
 		virtual VERTICES* createSphere(double radius, double x, double y, double z, int space);	
+		virtual void calculateDensity();
 		virtual void applyForces(double timeDiff);
 		virtual void smooth();
 		
