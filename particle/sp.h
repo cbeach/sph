@@ -46,7 +46,6 @@ class SmoothedParticle
 {
 	protected:
 		
-		double constForceConst;
 			
 		//variables that are needed for basic functioning
 		//physical properties
@@ -57,12 +56,11 @@ class SmoothedParticle
 		double 	radius;
 		double 	mass;
 		double 	viscosity;
-		int 	materialID;
+		int 	materialID;	//this will later be used to tell different fluids apart (eg. oil and water)
 		timer	*frameTimer;
 		double 	timeLastFrame;
 		double 	forceConstant;
-		bool	reversed;	//this is such a kludge... :(
-		double 	density;
+		double 	density;	
 
 		double threshold;	//thresHold distance between attractive and repulsive
 		double stretchR;	//stretctes the attractive force curve
@@ -118,21 +116,22 @@ class SmoothedParticle
 		virtual GLuint getDL();
 		
 		virtual void display(double);
-		virtual uVect* getForceAtPoint(SmoothedParticle*);
-		virtual void applyForce(uVect &, double);
-		virtual void updatePosition(double elapsedTime);
-		virtual vector <double>* pressureKernel(vector <double>*);
+		virtual uVect* getForceAtPoint(SmoothedParticle*);	//this is the biggest deal in this program
+		virtual void applyForce(uVect &, double);		//apply the forces to the velocity
+		virtual void updatePosition(double elapsedTime);	//apply the velocity to the position
+		
+		virtual vector <double>* pressureKernel(vector <double>*);	//smoothing kernel functions used in the getForceAtPoint function
 		virtual vector <double>* viscosityKernel(vector <double>*);
 		virtual	double densityKernel(vector <double>*);
 		
-		virtual void calculateDensity(SmoothedParticle*);		
+		virtual void calculateDensity(SmoothedParticle*);		//used to calculate the pressure force
 		
 
-		virtual inline void zeroDensity(){density = mass/(radius*radius*PI);};
+		virtual inline void zeroDensity(){density = mass/(radius*radius*PI);};	//this is used after the frame is over and the current density is no longer needed
 		virtual inline void printDensity(){cout << "density = " << density << " " << isnan(density) << endl;};
 
-		virtual void clearNAN()
-		{
+		virtual void clearNAN()	//a very kludgey solution to a nan problem I was having in the density calculation.
+		{			//finding the root cause of this is on my list of things to do.
 			if(isnan(density))
 				density = 0;
 		};

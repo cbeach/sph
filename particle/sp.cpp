@@ -28,7 +28,7 @@ using namespace std;
 
 SmoothedParticle::SmoothedParticle():radius(1),mass(1),viscosity(2.034),materialID(WATER),
 forceConstant(CONST_FORCE_CONST),threshold(0.5),stretchR(1),stretchA(1),
-offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
+offsetR(0),offsetA(0),maxR(100),maxA(-100)
 {
 	position = new vector <double> (3);
 	neighbors = new stack<int>;
@@ -39,7 +39,7 @@ offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
 
 SmoothedParticle::SmoothedParticle(const SmoothedParticle& clone):radius(1),mass(1),
 viscosity(2.034),materialID(WATER),forceConstant(CONST_FORCE_CONST),threshold(0.5),stretchR(1),
-stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
+stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100)
 {
 	position = new vector<double> (*clone.position);
 	neighbors = new stack<int> ;
