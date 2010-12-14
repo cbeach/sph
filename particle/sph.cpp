@@ -26,7 +26,7 @@ sph is responsible for orginization of a group of smooth particles.
 #include <util/uVect.h>
 #include <instrumentation.h>
 
-const int DIMENSION = 20;
+const int DIMENSION = 1.0;
 
 bool compareX(SmoothedParticle* left, SmoothedParticle* right)
 {
@@ -58,13 +58,13 @@ sph::sph()
 
 sph::sph(int particles)
 {
-
+	
 	dls = new vector <GLuint> (3);
 	frameTimer = new timer;
 	createDL(0,10);
 	double randX, randY, randZ;
 	double randI, randJ, randK; //velocity vector values
-
+	
 	srand(time(0));
 	
 	#ifdef VISIBLE_TEST
@@ -75,7 +75,7 @@ sph::sph(int particles)
 		material->at(i) = new SmoothedParticle();
 		material->at(i)->setDL(dls->at(0));
 		material->at(i)->setPosition(0, i/2.0, 0);
-		material->at(i)->setMass(5);
+		material->at(i)->setMass(1);
 	}
 
 	#endif
@@ -86,9 +86,9 @@ sph::sph(int particles)
 
 	for(int i = 0; i < particles; i++)
 	{
-		randX = ((double)rand()/(double)RAND_MAX) * 5.0;
-		randY = ((double)rand()/(double)RAND_MAX) * 5.0;
-		randZ = ((double)rand()/(double)RAND_MAX) * 5.0;
+		randX = ((double)rand()/(double)RAND_MAX) * 4.0;
+		randY = ((double)rand()/(double)RAND_MAX) * 4.0;
+		randZ = ((double)rand()/(double)RAND_MAX) * 4.0;
 		
 		randI = (((double)rand()/(double)RAND_MAX) * 0.2) - 0.1;
 		randJ = (((double)rand()/(double)RAND_MAX) * 0.2) - 0.1;
@@ -108,14 +108,14 @@ sph::sph(int particles)
 
 sph::sph(int particles, int cube)
 {
-//	particleCount = particles;
 	particleCount = DIMENSION*DIMENSION*DIMENSION;
 	dls = new vector <GLuint> (3);
 	frameTimer = new timer;
 	createDL(0,10);
 	srand(time(0));
-	
-//	material = new vector<SmoothedParticle*>(particles);
+
+	double randI, randJ, randK; //velocity vector values
+
 	material = new vector<SmoothedParticle*>(DIMENSION*DIMENSION*DIMENSION);
 
 	for(int i = 0; i < DIMENSION; i++)
@@ -123,11 +123,15 @@ sph::sph(int particles, int cube)
 		for(int j = 0; j < DIMENSION; j++)
 		{
 			for(int k = 0; k <  DIMENSION; k++)
-			{//	cout << DIMENSION*DIMENSION*i +DIMENSION*j +k << endl;
+			{
+				randI = (((double)rand()/(double)RAND_MAX) * 0.2) - 0.1;
+				randJ = (((double)rand()/(double)RAND_MAX) * 0.2) - 0.1;
+				randK = (((double)rand()/(double)RAND_MAX) * 0.2) - 0.1;
 
 				material->at(DIMENSION*DIMENSION*i + DIMENSION*j + k) = new SmoothedParticle();
 				material->at(DIMENSION*DIMENSION*i + DIMENSION*j + k)->setDL(dls->at(0));
-				material->at(DIMENSION*DIMENSION*i + DIMENSION*j + k)->setPosition(i/(DIMENSION/15.0), j/(DIMENSION/15.0), k/(DIMENSION/15.0));
+				material->at(DIMENSION*DIMENSION*i + DIMENSION*j + k)->setPosition(i/(DIMENSION/5.0), j/(DIMENSION/5.0), k/(DIMENSION/5.0));
+				material->at(i)->setVelocity(randI, randJ, randK);
 				material->at(DIMENSION*DIMENSION*i + DIMENSION*j + k)->setMass(5);
 			}
 		}
@@ -140,24 +144,14 @@ sph::sph(int particles, int cube)
 
 	}
 
-/*
-
-	for(int i = 0; i < particles; i++)
-	{
-		randX = ((double)rand()/(double)RAND_MAX) * 5.0;
-		randY = ((double)rand()/(double)RAND_MAX) * 5.0;
-		randZ = ((double)rand()/(double)RAND_MAX) * 5.0;
-
-		material->at(i) = new SmoothedParticle();
-		material->at(i)->setDL(dls->at(0));
-		material->at(i)->setPosition(randX, randY, randZ);
-		material->at(i)->setMass(5);
-	}
-*/
 	timeLastFrame = frameTimer->elapsed();
 }
 sph::~sph()
 {
+	for(int i = 0; i < particleCount; i++)
+	{
+		delete material->at(i);
+	}
 	delete material;
 //	delete metaMesh;
 	delete dls;
@@ -197,7 +191,7 @@ void sph::applyForces(double timeDiff)
 					    (primaryPositionVector->at(2) - secondaryPositionVector->at(2)));
 			}
 				
-			if(distance <= 2)
+			if(distance <= ER)
 			{
 				primaryTempUVect = material->at(i)->getForceAtPoint(material->at(j));
 				secondaryTempUVect = material->at(j)->getForceAtPoint(material->at(i));

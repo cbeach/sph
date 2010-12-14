@@ -163,7 +163,7 @@ uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 	//shorten expression length.
 	//eg. neighbor->position->at(0) = nPosition->at(0)
 	
-	vector <double> *nPosition = neighbor->position;
+	vector <double> *nPosition = neighbor->position;	//do NOT delete this vector
 	
 	double k = 5.0;
 
@@ -178,8 +178,8 @@ uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 	double nRadius = neighbor->radius;
 	double nDensity = neighbor->density;
 
-	double pressure = 1.0 + k*(density - nDensity);
-	double nPressure = 1.0 + k*(nDensity - density);
+	double pressure = 5.0 + k*(density - nDensity);
+	double nPressure = 5.0 + k*(nDensity - density);
 
 	vector <double> diffVector(3);
 
@@ -212,6 +212,8 @@ uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 		double zComponent = ((1.0) * diffVector.at(2) / distance) * forceZ * 5.0;
 	
 		uVect *tempUVect = new uVect(xComponent, yComponent, zComponent, 1);
+
+		delete pressureKernelValue;
 
 		return tempUVect;
 	}
@@ -252,7 +254,7 @@ void SmoothedParticle::updatePosition(double elapsedTime)
 	if(position->at(2) < 0)
 	{
 		position->at(2) -= vel->at(2) * elapsedTime * 2;
-		vel->at(2) *= -.88888888;
+		vel->at(2) *= -.25;
 
 	}
 
