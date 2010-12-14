@@ -31,7 +31,7 @@ using namespace std;
 using namespace boost;
 
 
-const double ER = .1;
+const double ER = .005; 
 
 
 struct BindingPoint

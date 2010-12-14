@@ -26,7 +26,7 @@ particle at a certain point.
 
 using namespace std;
 
-SmoothedParticle::SmoothedParticle():radius(1),mass(1),viscosity(-2.034),materialID(WATER),
+SmoothedParticle::SmoothedParticle():radius(1),mass(1),viscosity(2.034),materialID(WATER),
 forceConstant(CONST_FORCE_CONST),threshold(0.5),stretchR(1),stretchA(1),
 offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
 {
@@ -38,7 +38,7 @@ offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
 
 
 SmoothedParticle::SmoothedParticle(const SmoothedParticle& clone):radius(1),mass(1),
-viscosity(-2.034),materialID(WATER),forceConstant(CONST_FORCE_CONST),threshold(0.5),stretchR(1),
+viscosity(2.034),materialID(WATER),forceConstant(CONST_FORCE_CONST),threshold(0.5),stretchR(1),
 stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
 {
 	position = new vector<double> (*clone.position);
@@ -48,7 +48,7 @@ stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
 	mass = clone.mass;
 	materialID = clone.materialID;
 
-
+	color = new vector<int> (*clone.color);
 	pressureScale = clone.pressureScale;
 //	sphereDL = have to do extra things to this.
 
@@ -186,8 +186,8 @@ uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 	double nDensity = neighbor->density;
 	double nViscosity = neighbor->viscosity;
 
-	double pressure = .00001; //+ k*(density - nDensity);
-	double nPressure = .0000001; //+ k*(nDensity - density);
+	double pressure = .1; //+ k*(density - nDensity);
+	double nPressure = .1; //+ k*(nDensity - density);
 
 	vector <double> diffVector(3);
 
@@ -209,15 +209,15 @@ uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 	if(nDensity != 0)
 	{
 		//force due to pressure
-		forceX = -1.0 * nMass * ((nPressure + pressure)/(2*nDensity)) * pressureKernelValue->at(0);
-		forceY = -1.0 * nMass * ((nPressure + pressure)/(2*nDensity)) * pressureKernelValue->at(1);
-		forceZ = -1.0 * nMass * ((nPressure + pressure)/(2*nDensity)) * pressureKernelValue->at(2);
-/*
+		forceX = -1.0 * nMass * ((nPressure + pressure)/(2*nDensity)) * densityKernel(nPosition);//pressureKernelValue->at(0);
+		forceY = -1.0 * nMass * ((nPressure + pressure)/(2*nDensity)) * densityKernel(nPosition);//pressureKernelValue->at(1);
+		forceZ = -1.0 * nMass * ((nPressure + pressure)/(2*nDensity)) * densityKernel(nPosition);//;pressureKernelValue->at(2);
+
 		//force due to viscosity
-		forceX -= viscosity * nMass * ((viscosity * nViscosity)/nDensity) * viscosityKernelValue->at(0);
-		forceY -= viscosity * nMass * ((viscosity * nViscosity)/nDensity) * viscosityKernelValue->at(0);
-		forceZ -= viscosity * nMass * ((viscosity * nViscosity)/nDensity) * viscosityKernelValue->at(0);
-*/		
+		forceX += viscosity * nMass * ((viscosity * nViscosity)/nDensity) * viscosityKernelValue->at(0);
+		forceY += viscosity * nMass * ((viscosity * nViscosity)/nDensity) * viscosityKernelValue->at(1);
+		forceZ += viscosity * nMass * ((viscosity * nViscosity)/nDensity) * viscosityKernelValue->at(2);
+		
 		//cout << forceX << endl;
 		
 	}
@@ -231,6 +231,12 @@ uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 	//computing 
 	if(distance != 0)
 	{
+		if(forceX > 1)
+			forceX = 1;
+		if(forceY > 1)
+			forceY = 1;
+		if(forceZ > 1)
+			forceZ = 1;
 		double xComponent = ((1.0) * diffVector.at(0) / distance) * forceX * 5.0;
 		double yComponent = ((1.0) * diffVector.at(1) / distance) * forceY * 5.0;
 		double zComponent = ((1.0) * diffVector.at(2) / distance) * forceZ * 5.0;
@@ -278,39 +284,18 @@ void SmoothedParticle::updatePosition(double elapsedTime)
 	position->at(1) += vel->at(1) * elapsedTime;	
 	position->at(2) += vel->at(2) * elapsedTime;	
 	
-	cout << position->at(0) << endl;
+	//cout << position->at(0) << endl;
 
 	if(position->at(2) < 0)
 	{
 		position->at(2) -= vel->at(2) * elapsedTime * 2;
-		vel->at(2) *= -.25;
+		vel->at(2) *= -.2;
 
 	}
 
 	if(velocity)
 		delete velocity;
 	velocity = new uVect(vel->at(0), vel->at(1), vel->at(2), uVect::cart);
-
-/*this is supposed to be a box, but for some reason particles keep escaping	
-	if(position->at(0) > 20 || position->at(0) < 0 || 
-	   position->at(1) > 20 || position->at(1) < 0 || 
-	   position->at(2) > 20 || position->at(2) < 0)
-	{
-		if(!reversed)
-		{
-			velocity->invert();
-			reversed = true;
-		}
-		
-	}else{
-
-		reversed = false;
-
-	}
-*/
-	
-
-
 	
 	delete vel;
 }
@@ -352,9 +337,9 @@ vector <double>* SmoothedParticle::viscosityKernel(vector <double> *r)
 
 	tempVect->at(0) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
 				
-//	tempVect->at(1) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
+	tempVect->at(1) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
 
-//	tempVect->at(2) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
+	tempVect->at(2) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
 
 
 	return tempVect;
@@ -378,7 +363,7 @@ void SmoothedParticle::calculateDensity(SmoothedParticle *neighbor)
 {
 	if(neighbor)
 	{
-		density += abs(neighbor->mass * densityKernel(neighbor->position));
+		density += neighbor->mass * densityKernel(neighbor->position);
 	}
 }
 

@@ -23,7 +23,7 @@ ogl is used as a OpenGL controller.  ogl is responsible for managing all openGL 
 #define GLUT_SCROLL_UP 		3	//Used in the mouseButtonEvent callback.  freeglut has functionality for mouse scolling, but aparently not the defines.
 #define GLUT_SCROLL_DOWN	4	//so I added them to make my code more readable.
 
-const int PARTICLE_COUNT = 5000;	//This variable dictates how many particles will be in the simulation
+const int PARTICLE_COUNT = 10000;	//This variable dictates how many particles will be in the simulation
 
 
 using namespace std;
@@ -124,7 +124,7 @@ void ogl::display(void)		//this is the meat of the program.  ogl::display orchis
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//clear the color and depth buffers
 	glLoadIdentity();						
 	
-	gluLookAt(20.0,0.0,0.0,
+	gluLookAt(0.0,20.0,20.0,
 		   2.5,2.5,2.5,
 		   0.0,0.0,1.0);		//set the cammera's position
 #endif

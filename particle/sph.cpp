@@ -27,6 +27,7 @@ sph is responsible for orginization of a group of smooth particles.
 #include <instrumentation.h>
 
 const int DIMENSION = 0.01;
+#define VISIBLE_TEST
 
 bool compareX(SmoothedParticle* left, SmoothedParticle* right)
 {
@@ -212,7 +213,7 @@ void sph::applyForces(double timeDiff)
 			} else 
 			{
 				delete secondaryPositionVector;
-	
+					
 				break;
 			}
 		}
