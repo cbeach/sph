@@ -1,7 +1,7 @@
 /*************************************************************************
 Name:	Casey Beach
 Date:	10/10/2010
-SPH: 	ogl.h
+SPH: 	sp.h
 
 The class sp represents a single smooth particle.  It is responsible for
 all calculations regarding that particle (eg. getting the force from this 
@@ -135,26 +135,6 @@ class SmoothedParticle
 			if(isnan(density))
 				density = 0;
 		};
-
-		virtual inline void pushNeighbor(int n)
-		{
-			neighbors->push(n);
-		};
-		virtual inline int popNeighbor()
-		{	
-			int n = 0;
-			if(!neighbors->empty())
-			{
-				n = neighbors->top();
-				neighbors->pop();
-			}
-			return n;
-		};
-		virtual inline int sizeNeighbor()
-		{
-			return neighbors->size();
-		};
-
 };
 
 #endif

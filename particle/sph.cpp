@@ -27,9 +27,12 @@ sph is responsible for orginization of a group of smooth particles.
 #include <instrumentation.h>
 
 const int DIMENSION = 0.01;
-//#define VISIBLE_TEST
+//#define VISIBLE_TEST  //this tells the program to only make 5 particles in a horizontal line.
 
-bool compareX(SmoothedParticle* left, SmoothedParticle* right)
+//The sort algorithm in the stl algorithms library needs a 
+//comparison function to be able to work. This is it.
+
+bool compareZ(SmoothedParticle* left, SmoothedParticle* right)
 {
 	vector <double> *leftPosition = left->getPosition(); 
 	vector <double> *rightPosition = right->getPosition(); 
@@ -48,7 +51,7 @@ bool compareX(SmoothedParticle* left, SmoothedParticle* right)
 	return false;
 }
 
-
+//default constructor.
 sph::sph()
 {
 	dls = new vector <GLuint> (3);
@@ -56,6 +59,10 @@ sph::sph()
 	frameTimer = new timer;
 	timeLastFrame = frameTimer->elapsed();
 }
+
+//this constructor creates a vector the size of 
+//particles and initializes them with random positions
+//and velocities inside a bounding cube of size 4
 
 sph::sph(int particles)
 {
@@ -68,7 +75,7 @@ sph::sph(int particles)
 	
 	srand(time(0));
 	
-	#ifdef VISIBLE_TEST
+	#ifdef VISIBLE_TEST //only do 5 particles in a line
 	particleCount = 5;
 	material = new vector<SmoothedParticle*>(particleCount);
 	for(int i = 0; i < 5; i++)
@@ -106,6 +113,10 @@ sph::sph(int particles)
 	#endif
 	timeLastFrame = frameTimer->elapsed();
 }
+
+//this constructor is the same as above, but instead
+//of random positions it places the particles in a 
+//nice grid pattern with random velocities
 
 sph::sph(int particles, int cube)
 {
@@ -154,12 +165,13 @@ sph::~sph()
 		delete material->at(i);
 	}
 	delete material;
-//	delete metaMesh;
 	delete dls;
 	delete frameTimer;
 
 }
 
+//this is one of the most important functions in the 
+//program
 void sph::applyForces(double timeDiff)
 {
 	double distance = 0;
@@ -170,18 +182,21 @@ void sph::applyForces(double timeDiff)
 	vector <double> *secondaryPositionVector;
 	vector <double> vel;
 
-	sort(material->begin(), material->end(), compareX);	
+	//the vector with the SmoothedParticles in it has to 
+	//be sorted for the distance pruning to work
+	sort(material->begin(), material->end(), compareZ);
 	calculateDensity();
 
 	for(int i = 0; i < particleCount; i++)
 	{
-		
-		primaryPositionVector = material->at(i)->getPosition();
+		//primary is the particle we will be comparing the rest to
+		primaryPositionVector = material->at(i)->getPosition(); 
 		for(int j = i + 1; j < particleCount; j++)
 		{
-				
+			//secondary is a particle down the line	
 			secondaryPositionVector = material->at(j)->getPosition();
 			
+			//get the distance between the primary and secondary particles
 			if(primaryPositionVector && secondaryPositionVector)
 			{
 				distance = ((primaryPositionVector->at(0) - secondaryPositionVector->at(0))*
@@ -192,14 +207,14 @@ void sph::applyForces(double timeDiff)
 					    (primaryPositionVector->at(2) - secondaryPositionVector->at(2)));
 			}
 				
+			//if the distance is less then the effective radius
 			if(distance <= ER)
 			{
+				//get the forces that the two particles enact on each other
 				primaryTempUVect = material->at(i)->getForceAtPoint(material->at(j));
 				secondaryTempUVect = material->at(j)->getForceAtPoint(material->at(i));
 			
-				material->at(i)->pushNeighbor(j);
-				material->at(j)->pushNeighbor(i);
-				
+				//now apply those forces
 				if(primaryTempUVect && secondaryTempUVect)
 				{
 					material->at(i)->applyForce(*secondaryTempUVect, timeDiff);
@@ -221,12 +236,19 @@ void sph::applyForces(double timeDiff)
 		delete primaryPositionVector;
 	}
 
+	//all of the forces have been calculated.
+	//the velocities for this time step have
+	//been updated, now move the particles
 	for (int i = 0; i < particleCount; i++)
 	{
 		material->at(i)->updatePosition(timeDiff);
 		material->at(i)->zeroDensity();
 	}
 }
+
+//this is effectively the same algorith as above, but instead of 
+//getting and applying force it just calls the particle's 
+//calculate density function.
 
 void sph::calculateDensity()
 {
@@ -282,12 +304,16 @@ void sph::calculateDensity()
 
 }
 
-int sph::display()
+//this is sph's entrypoint each frame
+
+int sph::display()	
 {
 	int index = 0;
 	int success = 0;
 	bool cont = true;
 	
+	//this is used to log the elapsed time since 
+	//the last frame
 	double currentTime = frameTimer->elapsed();
 	
 	success = 0;
@@ -295,6 +321,7 @@ int sph::display()
 	
 	if((currentTime - timeLastFrame) > 0)
 	{
+		//move the particles
 		applyForces(currentTime - timeLastFrame);
 	}
 
@@ -309,9 +336,16 @@ int sph::display()
 					if(material->at(index))
 					{
 						
-						#ifndef SCHOOL
+						//ifndef SCHOOL is so I could work on this at school
+						//the school's computers are unable to do anything with
+						//OpenGL
+						#ifndef SCHOOL 
 						#ifdef VISIBLE_TEST
-						switch(index)
+						//if visible test is defined I only have
+						//5 particles on the screen, I want them
+						//to be different collors so I can keep track 
+						//of them
+						switch(index)	
 						{
 							case 0:
 								glColor3f(1.0,0.0,0.0);
@@ -334,6 +368,7 @@ int sph::display()
 
 						};
 						#endif
+						//display the particle
 						material->at(index)->display(timeLastFrame);
 						#endif
 					}
@@ -358,7 +393,7 @@ int sph::display()
 				cont = false;
 
 
-			
+			//update the time.
 			timeLastFrame = frameTimer->elapsed();
 			success = 1;
 		}
@@ -368,7 +403,7 @@ int sph::display()
 
 }
 
-void sph::createDL(int index, int space)
+void sph::createDL(int index, int space) //depricated
 {
 #ifndef SCHOOL	
 //	int VertexCount = (90/space)*(360/space)*4;
@@ -387,7 +422,7 @@ void sph::createDL(int index, int space)
 #endif
 }
 
-void sph::DisplaySphere (double R, int VertexCount, VERTICES *VERTEX)
+void sph::DisplaySphere (double R, int VertexCount, VERTICES *VERTEX)//depricated
 {
 
 	int b;
@@ -424,7 +459,7 @@ due to floating point rounding errors which would cause the triangle
 strip's ends not to meet.  With the addition of the new if blocks this
 should be fixed.
 *************************************************************************/
-VERTICES* sph::createSphere (double radius, double H, double K, double Z, int space) 
+VERTICES* sph::createSphere (double radius, double H, double K, double Z, int space) //depricated
 {
 	using namespace std;
 	int n;

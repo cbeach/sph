@@ -1,7 +1,7 @@
 /*************************************************************************
 Name:	Casey Beach
 Date:	10/13/2010
-SPH: 	ogl.h
+SPH: 	sph.h
 
 sph is responsible for orginization of a group of smooth particles.
 *************************************************************************/

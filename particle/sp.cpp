@@ -8,6 +8,8 @@ all calculations regarding that particle (eg. getting the force from this
 particle at a certain point.
 *************************************************************************/
 
+#include <stdlib.h>
+#include <time.h>
 
 #include <iostream>
 #include <vector>
@@ -50,10 +52,6 @@ stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100)
 
 	color = new vector<int> (*clone.color);
 	pressureScale = clone.pressureScale;
-//	sphereDL = have to do extra things to this.
-
-
-
 }
 
 SmoothedParticle::~SmoothedParticle()
@@ -228,22 +226,18 @@ uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 
 	
 
-	//computing 
+	//making the return vector
 	if(distance != 0)
 	{
+		//sanity check
 		if(forceX > 1)
 			forceX = 1;
 		if(forceY > 1)
 			forceY = 1;
 		if(forceZ > 1)
 			forceZ = 1;
-		double xComponent = ((1.0) * diffVector.at(0) / distance) * forceX * 5.0;
-		double yComponent = ((1.0) * diffVector.at(1) / distance) * forceY * 5.0;
-		double zComponent = ((1.0) * diffVector.at(2) / distance) * forceZ * 5.0;
-	
+
 		uVect *tempUVect = new uVect(forceX, forceY, forceZ, 1);
-		
-//		uVect *tempUVect = new uVect(xComponent, yComponent, zComponent, 1);
 
 		delete pressureKernelValue;
 		delete viscosityKernelValue;
@@ -254,6 +248,8 @@ uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 	delete viscosityKernelValue;
 	return NULL;
 }
+
+//this function takes a force, and applies it to the velocity of the particle
 
 void SmoothedParticle::applyForce(uVect &actingForce, double elapsedTime)
 {
@@ -271,6 +267,10 @@ void SmoothedParticle::applyForce(uVect &actingForce, double elapsedTime)
 	delete force;
 	delete vel;
 }
+
+//this is called after all of the paricles have interacted
+//in this time step.  This moves the particles according to
+//their velocity and how much time has elapsed.
 
 void SmoothedParticle::updatePosition(double elapsedTime)
 {
@@ -299,6 +299,9 @@ void SmoothedParticle::updatePosition(double elapsedTime)
 	
 	delete vel;
 }
+
+//The following three kernel functions are used in th egetForceatPoint
+//function
 
 vector <double>* SmoothedParticle::pressureKernel(vector <double> *r)
 {
@@ -356,9 +359,12 @@ double SmoothedParticle::densityKernel(vector <double> *r)
 
 }
 
-
-
-
+//this is the first thing that is done to this particle
+//the density is used in several force calculations.
+//Since this particle is a member of a greater system
+//the density that this particle represents should be
+//"smoothed" over the surrounding area by taking a 
+//weighted average of its neighbors.
 void SmoothedParticle::calculateDensity(SmoothedParticle *neighbor)
 {
 	if(neighbor)
@@ -367,7 +373,12 @@ void SmoothedParticle::calculateDensity(SmoothedParticle *neighbor)
 	}
 }
 
+//gives the particle's velocity a random kick
+void SmoothedParticle::perterb()
+{
+	srand(timer(NULL));
 
+}
 
 
 
