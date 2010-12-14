@@ -26,7 +26,7 @@ sph is responsible for orginization of a group of smooth particles.
 #include <util/uVect.h>
 #include <instrumentation.h>
 
-const int DIMENSION = 1.0;
+const int DIMENSION = 0.01;
 
 bool compareX(SmoothedParticle* left, SmoothedParticle* right)
 {
@@ -255,7 +255,7 @@ void sph::calculateDensity()
 				
 			if(distance <= ER*ER)
 			{
-				if(primaryTempUVect && secondaryTempUVect)
+				if(primaryPositionVector && secondaryPositionVector)
 				{
 					material->at(i)->calculateDensity(material->at(j));			
 				}

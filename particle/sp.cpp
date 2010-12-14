@@ -26,7 +26,7 @@ particle at a certain point.
 
 using namespace std;
 
-SmoothedParticle::SmoothedParticle():radius(1),mass(1),materialID(WATER),
+SmoothedParticle::SmoothedParticle():radius(1),mass(1),viscosity(-2.034),materialID(WATER),
 forceConstant(CONST_FORCE_CONST),threshold(0.5),stretchR(1),stretchA(1),
 offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
 {
@@ -38,7 +38,7 @@ offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
 
 
 SmoothedParticle::SmoothedParticle(const SmoothedParticle& clone):radius(1),mass(1),
-materialID(WATER),forceConstant(CONST_FORCE_CONST),threshold(0.5),stretchR(1),
+viscosity(-2.034),materialID(WATER),forceConstant(CONST_FORCE_CONST),threshold(0.5),stretchR(1),
 stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
 {
 	position = new vector<double> (*clone.position);
@@ -48,7 +48,7 @@ stretchA(1),offsetR(0),offsetA(0),maxR(100),maxA(-100),reversed(false)
 	mass = clone.mass;
 	materialID = clone.materialID;
 
-	color = new vector<int> (*clone.color);
+
 	pressureScale = clone.pressureScale;
 //	sphereDL = have to do extra things to this.
 
@@ -155,6 +155,15 @@ double SmoothedParticle::getMaterialID(){return materialID;}
 float SmoothedParticle::getPressurescale(){return pressureScale;}
 GLuint SmoothedParticle::getDL(){return DL;}
 
+/************************************************************************/
+//getForceAtPoint is the heart of this program.  This function dictates the
+//interaction between particles, which is what SPH is all about.
+//
+//
+//return value: The force that is returned by this function is the force
+//		that this particle enacts on its neighbor.
+//
+/************************************************************************/
 uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 {
 
@@ -165,30 +174,33 @@ uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 	
 	vector <double> *nPosition = neighbor->position;	//do NOT delete this vector
 	
-	double k = 5.0;
+	double k = .0000001;
 
 	double distance = 0.0;
-//	double force = 0;
 
 	double forceX = 0.0;
 	double forceY = 0.0;
 	double forceZ = 0.0;
 	
 	double nMass = neighbor->mass;
-	double nRadius = neighbor->radius;
 	double nDensity = neighbor->density;
+	double nViscosity = neighbor->viscosity;
 
-	double pressure = 5.0 + k*(density - nDensity);
-	double nPressure = 5.0 + k*(nDensity - density);
+	double pressure = .00001; //+ k*(density - nDensity);
+	double nPressure = .0000001; //+ k*(nDensity - density);
 
 	vector <double> diffVector(3);
 
+	//the vector representation of the distance between these
+	//two points
 	diffVector.at(0) = nPosition->at(0) - position->at(0);
 	diffVector.at(1) = nPosition->at(1) - position->at(1);
 	diffVector.at(2) = nPosition->at(2) - position->at(2);
 
 	vector <double> *pressureKernelValue = pressureKernel(&diffVector);
+	vector <double> *viscosityKernelValue = viscosityKernel(&diffVector);
 
+	//this is the distance between the two particles
 	distance = sqrt(diffVector.at(0)*diffVector.at(0) +
 			diffVector.at(1)*diffVector.at(1) + 
 			diffVector.at(2)*diffVector.at(2));
@@ -196,29 +208,44 @@ uVect* SmoothedParticle::getForceAtPoint(SmoothedParticle *neighbor)
 //	force = -(((distance-2)*(distance - 2)*(distance - 2)) - (distance - 2)*4);
 	if(nDensity != 0)
 	{
+		//force due to pressure
 		forceX = -1.0 * nMass * ((nPressure + pressure)/(2*nDensity)) * pressureKernelValue->at(0);
 		forceY = -1.0 * nMass * ((nPressure + pressure)/(2*nDensity)) * pressureKernelValue->at(1);
 		forceZ = -1.0 * nMass * ((nPressure + pressure)/(2*nDensity)) * pressureKernelValue->at(2);
+/*
+		//force due to viscosity
+		forceX -= viscosity * nMass * ((viscosity * nViscosity)/nDensity) * viscosityKernelValue->at(0);
+		forceY -= viscosity * nMass * ((viscosity * nViscosity)/nDensity) * viscosityKernelValue->at(0);
+		forceZ -= viscosity * nMass * ((viscosity * nViscosity)/nDensity) * viscosityKernelValue->at(0);
+*/		
+		//cout << forceX << endl;
+		
 	}
 	else
 	{
 		forceX = forceY = forceZ = 0;
 	}
 
+	
+
+	//computing 
 	if(distance != 0)
 	{
 		double xComponent = ((1.0) * diffVector.at(0) / distance) * forceX * 5.0;
 		double yComponent = ((1.0) * diffVector.at(1) / distance) * forceY * 5.0;
 		double zComponent = ((1.0) * diffVector.at(2) / distance) * forceZ * 5.0;
 	
-		uVect *tempUVect = new uVect(xComponent, yComponent, zComponent, 1);
+		uVect *tempUVect = new uVect(forceX, forceY, forceZ, 1);
+		
+//		uVect *tempUVect = new uVect(xComponent, yComponent, zComponent, 1);
 
 		delete pressureKernelValue;
-
+		delete viscosityKernelValue;
 		return tempUVect;
 	}
 
 	delete pressureKernelValue;
+	delete viscosityKernelValue;
 	return NULL;
 }
 
@@ -251,6 +278,8 @@ void SmoothedParticle::updatePosition(double elapsedTime)
 	position->at(1) += vel->at(1) * elapsedTime;	
 	position->at(2) += vel->at(2) * elapsedTime;	
 	
+	cout << position->at(0) << endl;
+
 	if(position->at(2) < 0)
 	{
 		position->at(2) -= vel->at(2) * elapsedTime * 2;
@@ -323,9 +352,9 @@ vector <double>* SmoothedParticle::viscosityKernel(vector <double> *r)
 
 	tempVect->at(0) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
 				
-	tempVect->at(1) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
+//	tempVect->at(1) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
 
-	tempVect->at(2) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
+//	tempVect->at(2) = (45.0/(PI*ER*ER*ER*ER*ER*ER)) * (ER*mag);
 
 
 	return tempVect;
@@ -349,7 +378,7 @@ void SmoothedParticle::calculateDensity(SmoothedParticle *neighbor)
 {
 	if(neighbor)
 	{
-		density += neighbor->mass * densityKernel(neighbor->position);
+		density += abs(neighbor->mass * densityKernel(neighbor->position));
 	}
 }
 

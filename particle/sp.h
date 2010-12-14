@@ -31,7 +31,7 @@ using namespace std;
 using namespace boost;
 
 
-const double ER = 0.1;
+const double ER = .1;
 
 
 struct BindingPoint
@@ -56,6 +56,7 @@ class SmoothedParticle
 		uVect 	*velocity;
 		double 	radius;
 		double 	mass;
+		double 	viscosity;
 		int 	materialID;
 		timer	*frameTimer;
 		double 	timeLastFrame;
@@ -127,7 +128,7 @@ class SmoothedParticle
 		virtual void calculateDensity(SmoothedParticle*);		
 		
 
-		virtual inline void zeroDensity(){density = 0;};
+		virtual inline void zeroDensity(){density = mass/(radius*radius*PI);};
 		virtual inline void printDensity(){cout << "density = " << density << " " << isnan(density) << endl;};
 
 		virtual void clearNAN()
